@@ -1,0 +1,6 @@
+#!/bin/bash
+
+make code/format
+
+
+exit 0
