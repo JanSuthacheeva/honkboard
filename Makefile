@@ -10,10 +10,19 @@ help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
 
-
 # ===========================================================================
 # DEVELOPMENT
 # ===========================================================================
+
+## web/run: Runs the project
+.PHONY: web/run
+web/run:
+	docker-compose up
+
+## db/mysql: Connect to the mysql shell inside docker
+.PHONY: db/mysql
+db/mysql:
+	docker exec -it honkboard-honkboard_mysql-1 bash -c "mysql -u honkboard -p"
 
 ## db/migrations/up: apply all new migrations
 .PHONY: db/migrations/up
@@ -37,3 +46,12 @@ db/migrations/new:
 db/seed:
 	@echo 'Goose seeding DB..'
 	goose ${GOOSE_DRIVER} ${GOOSE_DB_STRING} up -dir ./database/seeders -no-versioning
+
+# ===========================================================================
+# QUALITY
+# ===========================================================================
+
+## code/format: formats all go files
+.PHONY: code/format
+code/format:
+	go fmt ./...

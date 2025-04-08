@@ -1,6 +1,6 @@
 module github.com/jansuthacheeva/honkboard
 
-go 1.24.1
+go 1.23.7
 
 require (
 	github.com/bytedance/sonic v1.13.2 // indirect

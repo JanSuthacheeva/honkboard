@@ -1,0 +1,37 @@
+services:
+
+  honkboard_mysql:
+    image: mysql
+    restart: always
+    ports:
+        - '${DB_PORT:-3306}:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    volumes:
+      - 'honkboard_mysql:/var/lib/mysql'
+    networks:
+      - honkboard_network
+
+  honkboard:
+    image: cosmtrek/air
+    # working_dir value has to be the same of mapped volume
+    working_dir: /honkboard
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./:/honkboard/
+    depends_on:
+      - honkboard_mysql
+    networks:
+      - honkboard_network
+
+networks:
+    honkboard_network:
+        driver: bridge
+volumes:
+    honkboard_mysql:
