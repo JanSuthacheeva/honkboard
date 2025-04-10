@@ -3,6 +3,9 @@ module github.com/jansuthacheeva/honkboard
 go 1.23.7
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/awalterschulze/gographviz v0.0.0-20200901124122-0eecad45bd71 // indirect
+	github.com/blushft/go-diagrams v0.0.0-20250322201119-d91ac4ca5de4 // indirect
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
@@ -13,7 +16,10 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.26.0 // indirect
+	github.com/go-sql-driver/mysql v1.9.2 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
+	github.com/google/uuid v1.1.2 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

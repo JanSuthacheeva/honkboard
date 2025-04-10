@@ -35,7 +35,7 @@ db/migrations/up: confirm
 db/migrations/down:
 	goose down
 
-## db/migrations/new: create a new migration file (sql)
+## db/migrations/new $name: create a new migration file (sql)
 .PHONY: db/migrations/new
 db/migrations/new:
 	@echo 'Create new goose sql migration'
