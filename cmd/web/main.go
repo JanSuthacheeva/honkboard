@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 type application struct {
@@ -35,16 +35,16 @@ func main() {
 }
 
 func openDB(dsn string) (*sql.DB, error) {
-  db, err := sql.Open("mysql", dsn)
-  if err != nil {
-	return nil, err
-  }
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
 
-  err = db.Ping()
-  if err != nil {
-	db.Close()
-	return nil, err
-  }
+	err = db.Ping()
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
 
-  return db, nil
+	return db, nil
 }

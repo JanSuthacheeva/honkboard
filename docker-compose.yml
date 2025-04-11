@@ -1,21 +1,26 @@
 services:
 
   mysql:
-    image: mysql
+    image: mysql:latest
     restart: always
     ports:
-        - '${DB_PORT:-3306}:3306'
+        - '3306:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: 'password'
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: '${DB_DATABASE}'
-      MYSQL_USER: '${DB_USERNAME}'
-      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_DATABASE: 'honkboard_local'
+      MYSQL_USER: 'honkboard'
+      MYSQL_PASSWORD: 'password'
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     volumes:
-      - 'mysql:/var/lib/mysql'
+      - "./resources/db.sql:/docker-entrypoint-initdb.d/db.sql"
     networks:
       - honkboard_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   go:
     image: cosmtrek/air
@@ -24,9 +29,11 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - ./:/honkboard/
+      - .:/honkboard
+    restart: on-failure
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - honkboard_network
 
@@ -34,4 +41,5 @@ networks:
     honkboard_network:
         driver: bridge
 volumes:
-    mysql:
+    honkboard-mysql:
+        driver: local

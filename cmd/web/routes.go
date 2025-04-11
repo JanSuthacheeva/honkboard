@@ -1,16 +1,20 @@
 package main
 
-
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func (app *application) routes() *gin.Engine {
-	router := gin.Default()
-	router.LoadHTMLGlob("ui/html/pages/*")
+func (app *application) routes() *http.ServeMux {
 
-	router.GET("/", app.home)
+	fileServer := http.FileServer(http.Dir("./static/"))
+
+	router := http.NewServeMux()
+
+	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+
+	router.HandleFunc("/", app.home)
+
+
 
 	return router
 }
-

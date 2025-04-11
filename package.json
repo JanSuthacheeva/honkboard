@@ -1,0 +1,15 @@
+{
+  "name": "honkboard",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tailwindcss build -o static/css/tailwind.css",
+    "watch": "tailwindcss build -o static/css/tailwind.css --watch"
+  },
+  "author": "Jan Suthacheeva <jan.suthacheeva@gmail.com>",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "tailwindcss": "^4.1.3"
+  }
+}

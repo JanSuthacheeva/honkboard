@@ -1,0 +1,21 @@
+{{define "base"}}
+<!doctype html>
+<html lang='en'>
+		<head>
+			<meta charset='utf-8'>
+			<title>{{template "title" .}} - Honkboard</title>
+			<link rel="stylesheet" href="/static/css/main.css" />
+			<link rel="stylesheet" href="/static/css/tailwind.css" />
+		</head>
+		<body class="bg-feathers text-slate-900">
+				<header>
+						<h1 class="text-xl"><a href='/'>Honkboard</a></h1>
+				</header>
+				{{template "nav" .}}
+				<main>
+					{{template "main" .}}
+				</main>
+				<footer>Powered by <a href='https://golang.org/'>Go</a></footer>
+		</body>
+</html>
+{{end}}

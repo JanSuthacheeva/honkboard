@@ -6,11 +6,11 @@ import (
 )
 
 type User struct {
-	ID	int
-	Email string
+	ID             int
+	Email          string
 	HashedPassword string
-	Username string
-	CreatedAt time.Time
+	Username       string
+	CreatedAt      time.Time
 }
 
 type UserModel struct {
