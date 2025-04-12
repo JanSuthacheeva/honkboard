@@ -14,7 +14,5 @@ func (app *application) routes() *http.ServeMux {
 
 	router.HandleFunc("/", app.home)
 
-
-
 	return router
 }

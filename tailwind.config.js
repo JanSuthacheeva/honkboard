@@ -5,10 +5,12 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        // Fredoka!
+        fredoka: ["Fredoka", "sans-serif"]
       },
       colors: {
-        'feathers': '#FDF6E3'
+        'feathers': '#FDF6E3',
+        'feathers-dark': '#E6DFC9',
+        'beak': '#C87824'
       }
     },
   },
