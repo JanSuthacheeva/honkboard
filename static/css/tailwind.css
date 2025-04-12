@@ -534,6 +534,62 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.top-0 {
+  top: 0px;
+}
+
+.right-0 {
+  right: 0px;
+}
+
+.top-20 {
+  top: 5rem;
+}
+
+.top-\[4rem\] {
+  top: 4rem;
+}
+
+.top-\[-4rem\] {
+  top: -4rem;
+}
+
+.left-0 {
+  left: 0px;
+}
+
+.left-\[2rem\] {
+  left: 2rem;
+}
+
+.left-\[50\%\] {
+  left: 50%;
+}
+
+.left-\[52\%\] {
+  left: 52%;
+}
+
+.left-\[53\%\] {
+  left: 53%;
+}
+
+.left-\[54\%\] {
+  left: 54%;
+}
+
+.top-\[-3rem\] {
+  top: -3rem;
+}
+
 .mb-10 {
   margin-bottom: 2.5rem;
 }
@@ -572,6 +628,18 @@ video {
 
 .h-\[3rem\] {
   height: 3rem;
+}
+
+.h-\[10rem\] {
+  height: 10rem;
+}
+
+.h-\[7rem\] {
+  height: 7rem;
+}
+
+.h-\[6rem\] {
+  height: 6rem;
 }
 
 .w-1\/2 {
