@@ -14,14 +14,14 @@
 		<body class="text-slate-900 flex flex-col font-fredoka h-screen">
 				<header class="flex justify-center items-center gap-2 h-[5rem] bg-feathers-dark">
 					<img src="/static/img/logo-white.png" class="h-full"/>
-					<h1 class="text-3xl"><a href='/'>HONKBOARD</a></h1>
+					<h1 class="text-3xl">HONKBOARD</h1>
 				</header>
 				{{template "nav" .}}
 				<main class="w-full flex-grow">
 					{{template "main" .}}
 				</main>
 		<footer class="w-full flex justify-center bg-feathers-dark py-2 relative">
-			<p>Powered by <a href='https://golang.org/'>Go</a></p>
+			<p>Powered by <a class="underline focus:outline-none focus:text-beak hover:text-beak transition duration-150 ease-in" href='https://golang.org/'>Go</a></p>
 			<img class="absolute h-[6rem] top-[-3rem] left-[54%]" src="/static/img/standing.svg">
 		</footer>
 		</body>
