@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -12,6 +13,13 @@ import (
 )
 
 type application struct {
+	cfg    config
+	logger *slog.Logger
+}
+
+type config struct {
+	addr string
+	dsn  string
 }
 
 func main() {
@@ -20,18 +28,34 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	dsn := flag.String("dsn", os.Getenv("DB_STRING"), "MySQL data source name")
+	var cfg config
+
+	flag.StringVar(&cfg.dsn, "dsn", os.Getenv("DB_STRING"), "MySQL data source name")
+	flag.StringVar(&cfg.addr, "addr", ":4000", "HTTP network address")
 
 	flag.Parse()
 
-	_, err = openDB(*dsn)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+	}))
+
+	app := application{
+		cfg:    cfg,
+		logger: logger,
+	}
+
+	_, err = openDB(cfg.dsn)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
 	}
 
-	app := application{}
-	http.ListenAndServe(":4000", app.routes())
+	app.logger.Info("Starting server", slog.String("addr", cfg.addr))
+
+	err = http.ListenAndServe(cfg.addr, app.routes())
+
+	logger.Error(err.Error())
+	os.Exit(1)
 }
 
 func openDB(dsn string) (*sql.DB, error) {

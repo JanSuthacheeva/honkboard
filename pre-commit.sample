@@ -1,6 +1,14 @@
 #!/bin/bash
 
+staged_files=$(git diff --cached --name-only -- '*.go')
+
+if [ -z "$staged_files" ]; then
+		echo "No .go files staged for commit."
+		exit 0
+fi
+
 make code/format
 
+git add $staged_files
 
 exit 0
