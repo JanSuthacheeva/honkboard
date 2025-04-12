@@ -1,16 +1,16 @@
 package main
 
 import (
-	"runtime/debug"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 )
 
 func (app *application) serverError(w http.ResponseWriter, r *http.Request, err error) {
 	var (
 		method = r.Method
-		uri = r.URL.RequestURI()
-		trace = string(debug.Stack())
+		uri    = r.URL.RequestURI()
+		trace  = string(debug.Stack())
 	)
 
 	app.logger.Error(err.Error(), slog.String("method", method), slog.String("uri", uri), slog.String("trace", trace))
