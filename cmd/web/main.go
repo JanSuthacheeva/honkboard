@@ -13,13 +13,13 @@ import (
 )
 
 type application struct {
-	cfg config
+	cfg    config
 	logger *slog.Logger
 }
 
 type config struct {
 	addr string
-	dsn string
+	dsn  string
 }
 
 func main() {
@@ -40,7 +40,7 @@ func main() {
 	}))
 
 	app := application{
-		cfg: cfg,
+		cfg:    cfg,
 		logger: logger,
 	}
 
