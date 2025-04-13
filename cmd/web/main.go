@@ -9,12 +9,14 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jansuthacheeva/honkboard/internal/models"
 	"github.com/joho/godotenv"
 )
 
 type application struct {
 	cfg    config
 	logger *slog.Logger
+	todos  *models.TodoModel
 }
 
 type config struct {
@@ -39,15 +41,18 @@ func main() {
 		AddSource: true,
 	}))
 
-	app := application{
-		cfg:    cfg,
-		logger: logger,
-	}
-
-	_, err = openDB(cfg.dsn)
+	db, err := openDB(cfg.dsn)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
+	}
+
+	defer db.Close()
+
+	app := application{
+		cfg:    cfg,
+		logger: logger,
+		todos:  &models.TodoModel{DB: db},
 	}
 
 	app.logger.Info("Starting server", slog.String("addr", cfg.addr))
