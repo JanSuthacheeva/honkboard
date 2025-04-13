@@ -2,9 +2,11 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/justinas/alice"
 )
 
-func (app *application) routes() *http.ServeMux {
+func (app *application) routes() http.Handler {
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 
@@ -14,5 +16,7 @@ func (app *application) routes() *http.ServeMux {
 
 	router.HandleFunc("/", app.home)
 
-	return router
+	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
+
+	return standard.Then(router)
 }
