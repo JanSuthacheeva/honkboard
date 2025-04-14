@@ -48,7 +48,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) showPersonalTodos(w http.ResponseWriter, r *http.Request) {
-	todos, err := app.todos.GetAll("personal")
+	todos, err := app.todos.GetAll("Personal")
 	if err != nil {
 		app.serverError(w, r, err)
 	}
