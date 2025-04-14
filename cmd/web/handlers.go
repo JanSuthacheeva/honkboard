@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"strconv"
 
 	"github.com/jansuthacheeva/honkboard/internal/models"
 )
@@ -109,4 +110,24 @@ func (app *application) showProfessionalTodos(w http.ResponseWriter, r *http.Req
 		app.serverError(w, r, err)
 		return
 	}
+}
+
+func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	if id <= 0 {
+		app.notFound(w, r)
+		return
+	}
+
+	err = app.todos.Delete(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	w.Write([]byte(""))
 }

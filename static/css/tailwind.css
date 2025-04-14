@@ -663,6 +663,10 @@ video {
   gap: 0.5rem;
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
 .rounded-\[2rem\] {
   border-radius: 2rem;
 }
