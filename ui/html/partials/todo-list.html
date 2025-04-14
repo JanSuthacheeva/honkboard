@@ -1,0 +1,26 @@
+{{define "todo-list"}}
+	<div id="todo-list" class="py-2">
+		<h2 class="text-xl font-bold mb-4">{{.ListType}} Tasks</h2>
+		{{if .Todos}}
+		<ul class="mb-10 text-xl">
+		{{range .Todos}}
+			<li class="flex flex-row gap-2 items-center py-2 w-full justify-between border-b border-blue-300">
+			{{if eq .Status "done"}}
+				<button class="rounded-full border-2 border-beak h-[2rem] w-[2rem] focus:outline-none focus:scale-110 focus:bg-beak/30 hover:scale-110 hover:bg-beak/30 transition duration-150 ease-in">
+					<img src="/static/img/done.svg">
+				</button>
+				<p class="flex-grow line-through text-gray-500">{{.Title}}</p>
+			{{else}}
+				<button class="rounded-full border-2 border-black h-[2rem] w-[2rem] focus:outline-none focus:scale-110 focus:bg-beak/30 hover:scale-110 hover:bg-beak/30 transition duration-150 ease-in">
+				</button>
+				<p class="flex-grow">{{.Title}}</p>
+			{{end}}
+				<button class="h-[2rem] w-[2rem] rounded-full focus:outline-none focus:scale-110 focus:bg-beak/30 hover:scale-110 hover:bg-beak/30 transition duration-150 ease-in"><img src="/static/img/trashcan.svg"></button>
+			</li>
+		{{end}}
+		</ul>
+	{{else}}
+		<p class="mb-10 mt-2 text-xl">Quite day today... Let's add some tasks!</p>
+	{{end}}
+	</div>
+{{end}}

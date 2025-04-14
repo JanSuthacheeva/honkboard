@@ -7,14 +7,20 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jansuthacheeva/honkboard/internal/models"
 	"github.com/joho/godotenv"
 )
 
 type application struct {
-	cfg    config
-	logger *slog.Logger
+	cfg            config
+	logger         *slog.Logger
+	todos          *models.TodoModel
+	sessionManager *scs.SessionManager
 }
 
 type config struct {
@@ -39,15 +45,23 @@ func main() {
 		AddSource: true,
 	}))
 
-	app := application{
-		cfg:    cfg,
-		logger: logger,
-	}
-
-	_, err = openDB(cfg.dsn)
+	db, err := openDB(cfg.dsn)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
+	}
+
+	defer db.Close()
+
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
+	app := application{
+		cfg:            cfg,
+		logger:         logger,
+		todos:          &models.TodoModel{DB: db},
+		sessionManager: sessionManager,
 	}
 
 	app.logger.Info("Starting server", slog.String("addr", cfg.addr))
