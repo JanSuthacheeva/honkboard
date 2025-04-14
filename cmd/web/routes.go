@@ -18,7 +18,7 @@ func (app *application) routes() http.Handler {
 	router.HandleFunc("/professional", app.showProfessionalTodos)
 	router.HandleFunc("/personal", app.showPersonalTodos)
 
-	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
+	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders, app.sessionManager.LoadAndSave)
 
 	return standard.Then(router)
 }

@@ -1,6 +1,7 @@
 {{define "todo-list"}}
-	<div id="todo-list">
-	{{if .Todos}}
+	<div id="todo-list" class="py-2">
+		<h2 class="text-xl font-bold mb-4">{{.ListType}} Tasks</h2>
+		{{if .Todos}}
 		<ul class="mb-10 text-xl">
 		{{range .Todos}}
 			<li class="flex flew-row gap-2 items-center py-2 w-full justify-between border-b border-blue-300">

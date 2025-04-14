@@ -3,10 +3,20 @@ package main
 import (
 	"html/template"
 	"net/http"
+
+	"github.com/jansuthacheeva/honkboard/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	todos, err := app.todos.GetAll("personal")
+	listType := app.sessionManager.GetString(r.Context(), "list-type")
+
+	var todos []models.Todo
+	var err error
+	if listType == "" {
+		todos, err = app.todos.GetAll("Personal")
+	} else {
+		todos, err = app.todos.GetAll(listType)
+	}
 	if err != nil {
 		app.serverError(w, r, err)
 	}
@@ -25,7 +35,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := templateData{
-		Todos: todos,
+		Todos:    todos,
+		ListType: listType,
 	}
 
 	err = ts.ExecuteTemplate(w, "base", data)
@@ -53,8 +64,11 @@ func (app *application) showPersonalTodos(w http.ResponseWriter, r *http.Request
 	}
 
 	data := templateData{
-		Todos: todos,
+		Todos:    todos,
+		ListType: "Personal",
 	}
+
+	app.sessionManager.Put(r.Context(), "list-type", "Personal")
 
 	err = ts.ExecuteTemplate(w, "todo-list", data)
 	if err != nil {
@@ -64,7 +78,7 @@ func (app *application) showPersonalTodos(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) showProfessionalTodos(w http.ResponseWriter, r *http.Request) {
-	todos, err := app.todos.GetAll("professional")
+	todos, err := app.todos.GetAll("Professional")
 	if err != nil {
 		app.serverError(w, r, err)
 	}
@@ -81,8 +95,11 @@ func (app *application) showProfessionalTodos(w http.ResponseWriter, r *http.Req
 	}
 
 	data := templateData{
-		Todos: todos,
+		Todos:    todos,
+		ListType: "Professional",
 	}
+
+	app.sessionManager.Put(r.Context(), "list-type", "Professional")
 
 	err = ts.ExecuteTemplate(w, "todo-list", data)
 	if err != nil {
