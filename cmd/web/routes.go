@@ -15,6 +15,8 @@ func (app *application) routes() http.Handler {
 	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
 	router.HandleFunc("/", app.home)
+	router.HandleFunc("/professional", app.showProfessionalTodos)
+	router.HandleFunc("/personal", app.showPersonalTodos)
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 

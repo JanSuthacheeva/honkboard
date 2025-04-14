@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 )
 
@@ -52,7 +51,14 @@ func (m *TodoModel) Delete(id int) error {
 	return nil
 }
 
-func (m *TodoModel) Update(id int, title, status string) (*Todo, error) {
+func (m *TodoModel) UpdateStatus(id int, status string) (*Todo, error) {
+	// query := `UPDATE todos
+	// SET status = ?
+	// WHERE id = ?`
+
+	// ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	// defer cancel()
+
 	return nil, nil
 }
 
@@ -84,7 +90,7 @@ func (m *TodoModel) GetAll(todoType string) ([]Todo, error) {
 
 		status, ok := parseStatus(*statusString)
 		if !ok {
-			return nil, errors.New("Error parsing status string")
+			return nil, ErrUnknownStatus
 		}
 		t.Status = status
 
