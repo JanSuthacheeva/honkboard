@@ -51,6 +51,7 @@ func (app *application) showPersonalTodos(w http.ResponseWriter, r *http.Request
 	todos, err := app.todos.GetAll("Personal")
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	files := []string{
@@ -82,6 +83,7 @@ func (app *application) showProfessionalTodos(w http.ResponseWriter, r *http.Req
 	todos, err := app.todos.GetAll("Professional")
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	files := []string{
