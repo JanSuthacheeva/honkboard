@@ -75,7 +75,28 @@ func (m *TodoModel) Delete(id int) error {
 	return nil
 }
 
-func (m *TodoModel) DeleteCompleted() error {
+func (m *TodoModel) DeleteCompleted(listType string) error {
+	query := `DELETE FROM todos
+			WHERE type = ?
+			AND status = "done"`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, listType)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrNoRecord
+	}
+
 	return nil
 }
 
