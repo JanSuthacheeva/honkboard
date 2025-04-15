@@ -48,7 +48,7 @@ func (m *TodoModel) Insert(todo Todo) error {
 }
 
 func (m *TodoModel) Delete(id int) error {
-	if id <= 1 {
+	if id <= 0 {
 		return ErrNoRecord
 	}
 
