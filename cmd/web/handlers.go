@@ -4,8 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/jansuthacheeva/honkboard/internal/models"
 	"github.com/jansuthacheeva/honkboard/internal/validator"
@@ -35,6 +33,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
 		Todos:    todos,
 		ListType: listType,
+		Form:     createTodoForm{},
 	}
 
 	app.render(w, r, http.StatusOK, "index.html", "base", data)
