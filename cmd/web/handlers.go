@@ -8,11 +8,12 @@ import (
 	"unicode/utf8"
 
 	"github.com/jansuthacheeva/honkboard/internal/models"
+	"github.com/jansuthacheeva/honkboard/internal/validator"
 )
 
 type createTodoForm struct {
-	Title       string
-	FieldErrors map[string]string
+	Title string
+	validator.Validator
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -34,9 +35,6 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
 		Todos:    todos,
 		ListType: listType,
-		Form: createTodoForm{
-			FieldErrors: map[string]string{},
-		},
 	}
 
 	app.render(w, r, http.StatusOK, "index.html", "base", data)
@@ -85,17 +83,13 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 	listType := app.sessionManager.GetString(r.Context(), "list-type")
 
 	form := createTodoForm{
-		Title:       r.PostForm.Get("title"),
-		FieldErrors: map[string]string{},
+		Title: r.PostForm.Get("title"),
 	}
 
-	if strings.TrimSpace(form.Title) == "" {
-		form.FieldErrors["title"] = "This field cannot be blank"
-	} else if utf8.RuneCountInString(form.Title) > 80 {
-		form.FieldErrors["title"] = "This field cannot be more than 80 characters long"
-	}
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 80), "title", "This field cannot be more than 80 characters long")
 
-	if len(form.FieldErrors) > 0 {
+	if !form.Valid() {
 		todos, err := app.todos.GetAll(listType)
 		if err != nil {
 			app.serverError(w, r, err)
@@ -125,6 +119,7 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
 		Todos:    todos,
 		ListType: listType,
+		Form:     createTodoForm{},
 	}
 
 	app.render(w, r, http.StatusCreated, "index.html", "main", data)
