@@ -60,7 +60,7 @@ const Q = {
 				disableInheritance: false,
 				responseHandling: [{
 						code: "204",
-						swap: false
+						swap: true
 				}, {
 						code: "[23]..",
 						swap: true

@@ -20,6 +20,7 @@ func (app *application) routes() http.Handler {
 
 	router.HandleFunc("DELETE /todos/{id}", app.deleteTodo)
 	router.HandleFunc("DELETE /todos", app.deleteCompletedTodos)
+	router.HandleFunc("POST /todos", app.createTodo)
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders, app.sessionManager.LoadAndSave)
 
 	return standard.Then(router)
