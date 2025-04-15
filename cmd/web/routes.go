@@ -14,10 +14,12 @@ func (app *application) routes() http.Handler {
 
 	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	router.HandleFunc("/", app.home)
-	router.HandleFunc("/professional", app.showProfessionalTodos)
-	router.HandleFunc("/personal", app.showPersonalTodos)
+	router.HandleFunc("GET /", app.home)
+	router.HandleFunc("GET /professional", app.showProfessionalTodos)
+	router.HandleFunc("GET /personal", app.showPersonalTodos)
 
+	router.HandleFunc("DELETE /todos/{id}", app.deleteTodo)
+	router.HandleFunc("DELETE /todos", app.deleteCompletedTodos)
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders, app.sessionManager.LoadAndSave)
 
 	return standard.Then(router)

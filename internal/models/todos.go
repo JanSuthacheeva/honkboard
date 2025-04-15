@@ -48,17 +48,59 @@ func (m *TodoModel) Insert(todo Todo) error {
 }
 
 func (m *TodoModel) Delete(id int) error {
+	if id <= 0 {
+		return ErrNoRecord
+	}
+
+	query := `DELETE FROM todos
+			WHERE id = ?`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrNoRecord
+	}
+
+	return nil
+}
+
+func (m *TodoModel) DeleteCompleted(listType string) error {
+	query := `DELETE FROM todos
+			WHERE type = ?
+			AND status = "done"`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, listType)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrNoRecord
+	}
+
 	return nil
 }
 
 func (m *TodoModel) UpdateStatus(id int, status string) (*Todo, error) {
-	// query := `UPDATE todos
-	// SET status = ?
-	// WHERE id = ?`
-
-	// ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	// defer cancel()
-
 	return nil, nil
 }
 
