@@ -67,7 +67,32 @@ func (app *application) showProfessionalTodos(w http.ResponseWriter, r *http.Req
 }
 
 func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	listType := app.sessionManager.GetString(r.Context(), "list-type")
+	title := r.PostForm.Get("title")
 
+	_, err = app.todos.Insert(title, listType)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	todos, err := app.todos.GetAll(listType)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := templateData{
+		Todos:    todos,
+		ListType: listType,
+	}
+
+	app.render(w, r, http.StatusCreated, "index.html", "todo-list", data)
 }
 
 func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +132,6 @@ func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.render(w, r, http.StatusOK, "index.html", "todo-list", data)
-
 }
 
 func (app *application) deleteCompletedTodos(w http.ResponseWriter, r *http.Request) {
@@ -117,27 +141,36 @@ func (app *application) deleteCompletedTodos(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	data := templateData{
+		ListType: listType,
+	}
+
 	err := app.todos.DeleteCompleted(listType)
 	if err != nil {
-		app.serverError(w, r, err)
-		return
+		switch {
+		case errors.Is(err, models.ErrNoRecord):
+			data.Errors = []string{
+				"no completed tasks to delete",
+			}
+		default:
+			app.serverError(w, r, err)
+			return
+		}
 	}
 
 	todos, err := app.todos.GetAll(listType)
 	if err != nil {
-		// switch {
-		// case errors.Is(err, models.ErrNoRecord) {
-		// 422 or something that htmx can use
-		// }
-		// }
 		app.serverError(w, r, err)
 		return
 	}
 
-	data := templateData{
-		Todos:    todos,
-		ListType: listType,
+	data.Todos = todos
+
+	if data.Errors != nil {
+		app.render(w, r, http.StatusUnprocessableEntity, "index.html", "todo-list", data)
+	} else {
+
+		app.render(w, r, http.StatusOK, "index.html", "todo-list", data)
 	}
 
-	app.render(w, r, http.StatusOK, "index.html", "todo-list", data)
 }

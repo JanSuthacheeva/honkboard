@@ -11,6 +11,8 @@ type templateData struct {
 	Todo     models.Todo
 	Todos    []models.Todo
 	ListType string
+	Errors   []string
+	Form     any
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

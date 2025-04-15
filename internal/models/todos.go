@@ -43,8 +43,24 @@ type TodoModel struct {
 	DB *sql.DB
 }
 
-func (m *TodoModel) Insert(todo Todo) error {
-	return nil
+func (m *TodoModel) Insert(title, todoType string) (int, error) {
+	query := `INSERT INTO todos (title, status, type, created)
+		VALUES(?, "not done", ?, UTC_TIMESTAMP())`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, title, todoType)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
 }
 
 func (m *TodoModel) Delete(id int) error {

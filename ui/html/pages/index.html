@@ -2,11 +2,18 @@
 
 {{define "main"}}
 <section class="w-full flex flex-col items-center justify-center mt-10 gap-10">
-		<form class="flex flex-row w-3/4 justify-center h-[2.75rem]">
+		<form id="add-todo-form"
+			class="flex flex-row w-3/4 justify-center h-[2.75rem]"
+			hx-post="/todos"
+			hx-target="#todo-list"
+			hx-swap="outerHTML"
+		>
 			<input
 				type="text"
 				placeholder="What do you want to do today?"
-				class="bg-feathers px-4 text-xl rounded-l-full h-full flex-grow focus:outline-none focus:bg-beak/30 hover:bg-beak/30 transition duration-150 ease-in">
+				class="bg-feathers px-4 text-xl rounded-l-full h-full flex-grow focus:outline-none focus:bg-beak/30 hover:bg-beak/30 transition duration-150 ease-in"
+				name="title"
+		>
 			<button class="rounded-r-full bg-blue-300 px-2 text-xl text-white focus:outline-none focus:bg-blue-500 hover:bg-blue-500 transition duration-150 ease-in">ADD</button>
 		</form>
 		<section class="w-3/4 bg-feathers rounded-[2rem] px-10 pb-2">
@@ -23,5 +30,6 @@
 				</button>
 			</div>
 		</section>
+	<script src="/static/js/index.js"></script>
 </section>
 {{end}}
