@@ -4,9 +4,16 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/jansuthacheeva/honkboard/internal/models"
 )
+
+type createTodoForm struct {
+	Title       string
+	FieldErrors map[string]string
+}
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	listType := app.sessionManager.GetString(r.Context(), "list-type")
@@ -27,6 +34,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
 		Todos:    todos,
 		ListType: listType,
+		Form: createTodoForm{
+			FieldErrors: map[string]string{},
+		},
 	}
 
 	app.render(w, r, http.StatusOK, "index.html", "base", data)
@@ -73,9 +83,34 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	listType := app.sessionManager.GetString(r.Context(), "list-type")
-	title := r.PostForm.Get("title")
 
-	_, err = app.todos.Insert(title, listType)
+	form := createTodoForm{
+		Title:       r.PostForm.Get("title"),
+		FieldErrors: map[string]string{},
+	}
+
+	if strings.TrimSpace(form.Title) == "" {
+		form.FieldErrors["title"] = "This field cannot be blank"
+	} else if utf8.RuneCountInString(form.Title) > 80 {
+		form.FieldErrors["title"] = "This field cannot be more than 80 characters long"
+	}
+
+	if len(form.FieldErrors) > 0 {
+		todos, err := app.todos.GetAll(listType)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+		data := templateData{
+			Todos:    todos,
+			Form:     form,
+			ListType: listType,
+		}
+		app.render(w, r, http.StatusUnprocessableEntity, "index.html", "main", data)
+		return
+	}
+
+	_, err = app.todos.Insert(form.Title, listType)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -92,7 +127,7 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 		ListType: listType,
 	}
 
-	app.render(w, r, http.StatusCreated, "index.html", "todo-list", data)
+	app.render(w, r, http.StatusCreated, "index.html", "main", data)
 }
 
 func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
