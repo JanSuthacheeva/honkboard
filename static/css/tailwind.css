@@ -900,6 +900,15 @@ video {
   outline-offset: 2px;
 }
 
+.active\:bg-beak\/70:active {
+  background-color: rgb(200 120 36 / 0.7);
+}
+
+.active\:bg-slate-500:active {
+  --tw-bg-opacity: 1;
+  background-color: rgb(100 116 139 / var(--tw-bg-opacity));
+}
+
 @media (orientation: portrait) {
   .portrait\:mt-10 {
     margin-top: 2.5rem;

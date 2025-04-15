@@ -1,5 +1,8 @@
-document.getElementById("add-todo-form").addEventListener("htmx:afterRequest", function(event) {
+document.addEventListener("htmx:afterRequest", function(event) {
+	event.target.blur();
 	if (event.detail.successful) {
-		this.reset();
+		if (event.target.tagName === "FORM") {
+				event.target.reset();
+		}
 	}
 });
