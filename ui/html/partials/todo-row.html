@@ -1,0 +1,32 @@
+{{define "todo-row"}}
+<li id="todo-{{.ID}}" class="flex flex-row gap-2 items-center py-2 w-full justify-between border-b border-blue-300">
+	{{if eq .Status "done"}}
+		<button
+			class="rounded-full border-2 border-beak h-[2rem] w-[2rem] focus:outline-none focus:scale-110 focus:bg-beak/30 hover:scale-110 hover:bg-beak/30 transition duration-150 ease-in"
+			hx-patch="/todos/{{.ID}}/status"
+			hx-target="#todo-{{.ID}}"
+			hx-swap="outerHTML"
+		>
+			<img src="/static/img/done.svg">
+		</button>
+		<p class="flex-grow line-through text-gray-500">{{.Title}}</p>
+	{{else}}
+		<button
+			class="rounded-full border-2 border-black h-[2rem] w-[2rem] focus:outline-none focus:scale-110 focus:bg-beak/30 hover:scale-110 hover:bg-beak/30 transition duration-150 ease-in"
+			hx-patch="/todos/{{.ID}}/status"
+			hx-target="#todo-{{.ID}}"
+			hx-swap="outerHTML"
+	>
+		</button>
+		<p class="flex-grow">{{.Title}}</p>
+	{{end}}
+		<button
+			class="h-[2rem] w-[2rem] rounded-full focus:outline-none focus:scale-110 focus:bg-beak/30 hover:scale-110 hover:bg-beak/30 transition duration-150 ease-in"
+			hx-delete="/todos/{{.ID}}"
+			hx-swap="outerHTML"
+			hx-target="#todo-list"
+	>
+		<img src="/static/img/trashcan.svg">
+	</button>
+	</li>
+{{end}}

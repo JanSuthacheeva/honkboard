@@ -3,6 +3,8 @@ package models
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -92,6 +94,7 @@ func (m *TodoModel) Delete(id int) error {
 }
 
 func (m *TodoModel) DeleteCompleted(listType string) error {
+
 	query := `DELETE FROM todos
 			WHERE type = ?
 			AND status = "done"`
@@ -116,8 +119,77 @@ func (m *TodoModel) DeleteCompleted(listType string) error {
 	return nil
 }
 
-func (m *TodoModel) UpdateStatus(id int, status string) (*Todo, error) {
-	return nil, nil
+func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	tx, err := m.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return Todo{}, err
+	}
+
+	defer tx.Rollback()
+
+	statusQuery := `SELECT status FROM todos
+		WHERE id = ?`
+
+	var statusString string
+
+	row := tx.QueryRowContext(ctx, statusQuery, id)
+	err = row.Scan(&statusString)
+
+	oldStatus, ok := parseStatus(statusString)
+	if !ok {
+		panic(fmt.Sprintf("Error fetching status from DB for Todo %d", id))
+	}
+
+	var status TodoStatus
+	switch {
+	case oldStatus == StatusDone:
+		status = StatusNotDone
+	case oldStatus == StatusNotDone:
+		status = StatusDone
+	default:
+		panic(fmt.Sprintf("Error switching status: %v", oldStatus))
+	}
+
+	updateQuery := `UPDATE todos SET status = ?
+		WHERE id = ?`
+
+	result, err := tx.ExecContext(ctx, updateQuery, status.String(), id)
+	if err != nil {
+		return Todo{}, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return Todo{}, err
+	}
+
+	if rowsAffected == 0 {
+		return Todo{}, ErrNoRecord
+	}
+
+	getQuery := `SELECT id, title, status, created FROM todos WHERE id = ?`
+
+	row = tx.QueryRowContext(ctx, getQuery, id)
+
+	var todo Todo
+	err = row.Scan(&todo.ID, &todo.Title, &todo.Status, &todo.Created)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return Todo{}, ErrNoRecord
+		default:
+			return Todo{}, err
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		return Todo{}, err
+	}
+
+	return todo, nil
 }
 
 func (m *TodoModel) GetAll(todoType string) ([]Todo, error) {

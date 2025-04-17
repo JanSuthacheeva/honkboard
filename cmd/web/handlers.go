@@ -124,6 +124,38 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusCreated, "index.html", "main", data)
 }
 
+func (app *application) toggleTodoStatus(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	if id <= 0 {
+		app.notFound(w, r)
+		return
+	}
+	todo, err := app.todos.ToggleStatus(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	listType := app.sessionManager.GetString(r.Context(), "list-type")
+	if listType == "" {
+		app.sessionManager.Put(r.Context(), "list-type", "Personal")
+	}
+
+	data := templateData{
+		ListType: listType,
+		ID:       todo.ID,
+		Title:    todo.Title,
+		Status:   todo.Status.String(),
+	}
+
+	app.render(w, r, http.StatusOK, "index.html", "todo-row", data)
+}
+
 func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
 	var todos []models.Todo
 	var err error
@@ -201,5 +233,4 @@ func (app *application) deleteCompletedTodos(w http.ResponseWriter, r *http.Requ
 
 		app.render(w, r, http.StatusOK, "index.html", "todo-list", data)
 	}
-
 }

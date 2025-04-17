@@ -8,8 +8,10 @@ import (
 )
 
 type templateData struct {
-	Todo     models.Todo
 	Todos    []models.Todo
+	ID       int
+	Title    string
+	Status   string
 	ListType string
 	Errors   []string
 	Form     any
