@@ -4,55 +4,37 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
+
+	"github.com/jansuthacheeva/honkboard/internal/enums"
 )
 
 type Todo struct {
 	ID      int
 	Title   string
-	Type    string
-	Status  TodoStatus
+	Type    enums.TodoType
+	Status  enums.TodoStatus
 	Created time.Time
-}
-
-type TodoStatus string
-
-const (
-	StatusDone    TodoStatus = "done"
-	StatusNotDone TodoStatus = "not done"
-)
-
-var statusName = map[TodoStatus]string{
-	StatusDone:    "done",
-	StatusNotDone: "not done",
-}
-
-func (ts TodoStatus) String() string {
-	return statusName[ts]
-}
-
-func parseStatus(s string) (TodoStatus, bool) {
-	for status, name := range statusName {
-		if name == s {
-			return status, true
-		}
-	}
-	return "", false
 }
 
 type TodoModel struct {
 	DB *sql.DB
 }
 
-func (m *TodoModel) Insert(title, todoType string) (int, error) {
+func (m *TodoModel) Insert(title, typeString string) (int, error) {
+
+	todoType, ok := enums.ParseTodoType(typeString)
+	if !ok {
+		return 0, ErrUnknownType
+	}
+
 	query := `INSERT INTO todos (title, status, type, created)
 		VALUES(?, "not done", ?, UTC_TIMESTAMP())`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	result, err := m.DB.ExecContext(ctx, query, title, todoType)
+	result, err := m.DB.ExecContext(ctx, query, title, todoType.String())
 	if err != nil {
 		return 0, err
 	}
@@ -95,6 +77,11 @@ func (m *TodoModel) Delete(id int) error {
 
 func (m *TodoModel) DeleteCompleted(listType string) error {
 
+	todoType, ok := enums.ParseTodoType(listType)
+	if !ok {
+		return ErrUnknownType
+	}
+
 	query := `DELETE FROM todos
 			WHERE type = ?
 			AND status = "done"`
@@ -102,7 +89,7 @@ func (m *TodoModel) DeleteCompleted(listType string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	result, err := m.DB.ExecContext(ctx, query, listType)
+	result, err := m.DB.ExecContext(ctx, query, todoType.String())
 	if err != nil {
 		return err
 	}
@@ -139,17 +126,17 @@ func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
 	row := tx.QueryRowContext(ctx, statusQuery, id)
 	err = row.Scan(&statusString)
 
-	oldStatus, ok := parseStatus(statusString)
+	oldStatus, ok := enums.ParseTodoStatus(statusString)
 	if !ok {
 		return Todo{}, ErrUnknownStatus
 	}
 
-	var status TodoStatus
+	var status enums.TodoStatus
 	switch {
-	case oldStatus == StatusDone:
-		status = StatusNotDone
-	case oldStatus == StatusNotDone:
-		status = StatusDone
+	case oldStatus == enums.TodoStatusDone:
+		status = enums.TodoStatusNotDone
+	case oldStatus == enums.TodoStatusNotDone:
+		status = enums.TodoStatusDone
 	default:
 		return Todo{}, ErrUnknownStatus
 	}
@@ -192,14 +179,20 @@ func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
 	return todo, nil
 }
 
-func (m *TodoModel) GetAll(todoType string) ([]Todo, error) {
+func (m *TodoModel) GetAll(listType string) ([]Todo, error) {
+
+	todoType, ok := enums.ParseTodoType(listType)
+	if !ok {
+		return nil, ErrUnknownType
+	}
+
 	query := `SELECT id, title, status, created FROM todos
 			WHERE type = ?`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, todoType)
+	rows, err := m.DB.QueryContext(ctx, query, todoType.String())
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +211,7 @@ func (m *TodoModel) GetAll(todoType string) ([]Todo, error) {
 			return nil, err
 		}
 
-		status, ok := parseStatus(*statusString)
+		status, ok := enums.ParseTodoStatus(*statusString)
 		if !ok {
 			return nil, ErrUnknownStatus
 		}
