@@ -141,7 +141,7 @@ func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
 
 	oldStatus, ok := parseStatus(statusString)
 	if !ok {
-		panic(fmt.Sprintf("Error fetching status from DB for Todo %d", id))
+		return Todo{}, ErrUnknownStatus
 	}
 
 	var status TodoStatus
@@ -151,7 +151,7 @@ func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
 	case oldStatus == StatusNotDone:
 		status = StatusDone
 	default:
-		panic(fmt.Sprintf("Error switching status: %v", oldStatus))
+		return Todo{}, ErrUnknownStatus
 	}
 
 	updateQuery := `UPDATE todos SET status = ?
