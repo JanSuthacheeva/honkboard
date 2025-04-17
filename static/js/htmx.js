@@ -60,15 +60,42 @@ const Q = {
 				disableInheritance: false,
 				responseHandling: [{
 						code: "204",
-						swap: false
+						swap: true
 				}, {
 						code: "[23]..",
 						swap: true
-				}, {
-						code: "[45]..",
+				},
+				{
+						code: "422",
+						swap: true,
+						error: true
+				},
+				{
+						code: "4[01][09]",
 						swap: false,
 						error: true
-				}],
+				},
+				{
+						code: "421",
+						swap: false,
+						error: true
+				},
+				{
+						code: "42[3-9]",
+						swap: false,
+						error: true
+				},
+				{
+						code: "4[3-9][0-9]",
+						swap: false,
+						error: true
+				},
+				{
+						code: "5[0-9][0-9]",
+						swap: false,
+						error: true
+				}
+			],
 				allowNestedOobSwaps: true
 		},
 		parseInterval: null,

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"log/slog"
 	"net/http"
@@ -21,6 +22,7 @@ type application struct {
 	logger         *slog.Logger
 	todos          *models.TodoModel
 	sessionManager *scs.SessionManager
+	templateCache  map[string]*template.Template
 }
 
 type config struct {
@@ -57,11 +59,18 @@ func main() {
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app := application{
 		cfg:            cfg,
 		logger:         logger,
 		todos:          &models.TodoModel{DB: db},
 		sessionManager: sessionManager,
+		templateCache:  templateCache,
 	}
 
 	app.logger.Info("Starting server", slog.String("addr", cfg.addr))
