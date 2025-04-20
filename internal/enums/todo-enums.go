@@ -1,7 +1,5 @@
 package enums
 
-import ()
-
 type TodoStatus string
 type TodoType string
 
