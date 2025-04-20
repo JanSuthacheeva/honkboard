@@ -10,8 +10,10 @@
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 			<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
 			<link rel="icon" type="image/x-icon" href="/static/img/favicon.ico">
+			<script defer src="/static/js/alpine.js"></script>
+			<script defer src="/static/js/htmx.js"></script>
 		</head>
-		<body class="text-slate-900 flex flex-col font-fredoka h-screen overflow-hidden">
+		<body class="relative text-slate-900 flex flex-col font-fredoka h-screen overflow-hidden">
 				<header class="flex justify-center items-center gap-2 h-[5rem] bg-feathers-dark">
 					<img src="/static/img/logo-white.png" class="h-full"/>
 					<h1 class="text-3xl">HONKBOARD</h1>
@@ -24,7 +26,6 @@
 				<p>Powered by <a class="underline focus:outline-none focus:text-beak hover:text-beak transition duration-150 ease-in" href='https://golang.org/'>Go</a></p>
 				<img class="absolute h-[6rem] top-[-3rem] left-[54%]" src="/static/img/standing.svg">
 			</footer>
-			<script src="/static/js/htmx.js"></script>
 		</body>
 </html>
 {{end}}

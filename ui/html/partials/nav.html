@@ -1,16 +1,16 @@
 {{define "nav"}}
 <nav class="bg-feathers flex h-[2.5rem] items-center text-xl">
 	<button
-		class='w-1/2 h-full text-center focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in'
+		class='w-1/2 h-full text-center focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher'
 		hx-get="/personal"
 		hx-target="#todo-list"
-		hx-swap="outerHTML"
+		hx-swap="outerHTML swap:0.17s"
 	>Personal</button>
 	<button
-		class='w-1/2 h-full text-center focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in'
+		class='w-1/2 h-full text-center focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher'
 		hx-get="/professional"
 		hx-target="#todo-list"
-		hx-swap="outerHTML"
+		hx-swap="outerHTML swap:0.17s"
 	>Professional</button>
 </nav>
 {{end}}

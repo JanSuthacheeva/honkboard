@@ -2,40 +2,74 @@
 
 {{define "main"}}
 <section
+	x-data="modal"
 	id="todo-section"
-	class="w-full flex flex-col items-center justify-center mt-4 landscape:lg:mt-10 portrait:mt-10 gap-4 landscape:lg:gap-10 portrait:gap-10">
-	<form id="add-todo-form"
-		class="flex flex-row w-3/4 justify-center h-[2.75rem] relative"
-		hx-post="/todos"
-		hx-target="#todo-section"
-		hx-swap="outerHTML"
+	class="w-full h-full"
+>
+	<div
+		class="w-full flex flex-col items-center justify-center landscape:lg:mt-10 portrait:mt-10 gap-4 landscape:lg:gap-10 portrait:gap-10"
+		x-bind:class="pointerClass"
 	>
-		<input
-			type="text"
-			placeholder="What do you want to do today?"
-			class="bg-feathers px-4 text-xl rounded-l-full h-full flex-grow focus:outline-none focus:bg-beak/30 hover:bg-beak/30 transition duration-150 ease-in"
-			name="title"
-			{{with .Form.Title}} value="{{.}}"{{end}}
-	>
-		<button class="rounded-r-full bg-blue-300 px-2 text-xl text-white focus:outline-none focus:bg-blue-500 hover:bg-blue-500 transition duration-150 ease-in">ADD</button>
-		{{with .Form.FieldErrors.title}}
-			<span class="absolute top-12 left-2 text-red-500">{{.}}</span>
-		{{end}}
-	</form>
-	<section class="w-3/4 bg-feathers rounded-[2rem] px-10 pb-2 landscape:max-h-[35vh] lg:landscape:max-h-[55vh] portrait:max-h-[70vh] overflow-y-scroll">
-		{{template "todo-list" .}}
-		<div class="text-beak flex flex-row justify-end pr-12">
+		<form id="add-todo-form"
+			class="flex flex-row w-3/4 justify-center h-[2.75rem] relative"
+			hx-post="/todos"
+			hx-target="#todo-section"
+			hx-swap="outerHTML"
+		>
+			<input
+				type="text"
+				placeholder="What do you want to do today?"
+				class="bg-feathers px-4 text-xl rounded-l-full h-full flex-grow focus:outline-none focus:bg-beak/30 hover:bg-beak/30 transition duration-150 ease-in"
+				name="title"
+				{{with .Form.Title}} value="{{.}}"{{end}}
+			>
+			<button class="rounded-r-full bg-blue-300 px-2 text-xl text-white focus:outline-none focus:bg-blue-500 hover:bg-blue-500 transition duration-150 ease-in">ADD</button>
+			{{with .Form.FieldErrors.title}}
+				<span class="absolute top-12 left-2 text-red-500">{{.}}</span>
+			{{end}}
+		</form>
+		<section class="w-3/4 bg-feathers rounded-[2rem] px-10 pb-2 landscape:max-h-[35vh] lg:landscape:max-h-[55vh] portrait:max-h-[70vh] overflow-y-scroll overflow-x-hidden">
+			{{template "todo-list" .}}
+			<div class="text-beak flex flex-row justify-end pr-12">
+				<button
+					class="h-[2rem] flex flex-row items-center rounded-full px-2 focus:outline-none focus:bg-slate-300 focus:scale-110 hover:bg-slate-300 hover:scale-110 active:bg-slate-500 transition duration-150 ease-in"
+					@click="openModal"
+				>
+					<img class="h-full" src="/static/img/cleanup.svg">
+					<span>Clear Completed</span>
+				</button>
+			</div>
+		</section>
+		<script src="/static/js/index.js"></script>
+	</div>
+	<div
+		x-show="showModal"
+		x-transition:enter="transition ease-out duration-300"
+		x-transition:enter-start="opacity-0"
+		x-transition:enter-end="opacity-100"
+		x-transition:leave="transition ease-in duration-300"
+		x-transition:leave-start="opacity-100"
+		x-transition:leave-end="opacity-0"
+		class="absolute z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3/4 sm:w-1/2 md:w-1/3 p-4 rounded-[2rem] bg-white overflow-hidden shadow-md">
+		<div class="flex flex-row justify-between items-start relative">
+			<section class="h-[6rem]">
+			<h3 class="text-xl font-bold mb-4">Are you sure?</h3>
+			<p>Do you really want to delete all completed To-Dos?</p>
+			</section>
+			<img class="absolute bottom-[-4.7rem] right-1/3 w-[6rem] h-[6rem] opacity-40" src="/static/img/confirm.svg">
+		</div>
+		<div class="flex flex-row items-center justify-between px-4 mt-2">
 			<button
-				class="h-[2rem] flex flex-row items-center rounded-full px-2 focus:outline-none focus:bg-slate-300 focus:scale-110 hover:bg-slate-300 hover:scale-110 active:bg-slate-500 transition duration-150 ease-in"
+				class="text-white rounded-xl bg-blue-300 px-2 py-1 focus:outline-none focus:bg-blue-500 hover:bg-blue-500 transition duration-150 ease-in"
+				@click="closeModal"
 				hx-delete="/todos"
 				hx-target="#todo-list"
 				hx-swap="outerHTML"
-			>
-				<img class="h-full" src="/static/img/cleanup.svg">
-				<span>Clear Completed</span>
-			</button>
+			>Yes</button>
+			<button
+				@click="closeModal"
+				class="text-white rounded-xl bg-beak/70 px-2 py-1 focus:outline-none focus:bg-beak hover:bg-beak transition duration-150 ease-in">Nope</button>
 		</div>
-	</section>
-	<script src="/static/js/index.js"></script>
+	</div>
 </section>
 {{end}}
