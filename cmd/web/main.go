@@ -21,7 +21,7 @@ import (
 type application struct {
 	cfg            config
 	logger         *slog.Logger
-	todos          *models.TodoModel
+	todos          models.TodoModelInterface
 	sessionManager *scs.SessionManager
 	templateCache  map[string]*template.Template
 }
