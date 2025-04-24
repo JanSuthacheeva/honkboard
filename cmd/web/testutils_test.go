@@ -27,6 +27,7 @@ func NewTestApplication(t *testing.T) *application {
 	sessionManager.Cookie.Name = "session_id"
 
 	return &application{
+		// logger:         slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true,})),
 		logger:         slog.New(slog.DiscardHandler),
 		todos:          &mocks.TodoModel{},
 		sessionManager: sessionManager,

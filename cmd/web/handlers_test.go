@@ -31,7 +31,7 @@ func TestHome(t *testing.T) {
 			name:     "professional todos",
 			listType: enums.TodoTypeProfessional.String(),
 			wantCode: http.StatusOK,
-			wantBody: "Quite day today... Let's add some tasks!",
+			wantBody: "Quiet day today... Let's add some tasks!",
 		},
 		{
 			name:     "invalid list type",
@@ -59,5 +59,63 @@ func TestHome(t *testing.T) {
 				assert.StringContains(t, body, tt.wantBody)
 			}
 		})
+	}
+}
+
+func TestShowPersonalTodos(t *testing.T) {
+	app := NewTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name         string
+		wantCode     int
+		wantBody     string
+		wantListType string
+	}{
+		{
+			name:         "shows todo",
+			wantCode:     http.StatusOK,
+			wantBody:     "Mock Todo",
+			wantListType: "Personal",
+		},
+	}
+
+	for _, tt := range tests {
+		code, _, body := ts.get(t, "/personal", nil)
+
+		assert.Equal(t, code, tt.wantCode)
+		if tt.wantBody != "" {
+			assert.StringContains(t, body, tt.wantBody)
+		}
+	}
+}
+
+func TestShowProfessionalTodos(t *testing.T) {
+	app := NewTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name         string
+		wantCode     int
+		wantBody     string
+		wantListType string
+	}{
+		{
+			name:         "shows nothing",
+			wantCode:     http.StatusOK,
+			wantBody:     "Quiet day today",
+			wantListType: "Professional",
+		},
+	}
+
+	for _, tt := range tests {
+		code, _, body := ts.get(t, "/professional", nil)
+
+		assert.Equal(t, code, tt.wantCode)
+		if tt.wantBody != "" {
+			assert.StringContains(t, body, tt.wantBody)
+		}
 	}
 }
