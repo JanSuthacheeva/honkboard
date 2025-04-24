@@ -30,15 +30,6 @@
 		</form>
 		<section class="w-3/4 bg-feathers rounded-[2rem] px-10 pb-2 landscape:max-h-[35vh] lg:landscape:max-h-[55vh] portrait:max-h-[70vh] overflow-y-scroll overflow-x-hidden">
 			{{template "todo-list" .}}
-			<div class="text-beak flex flex-row justify-end pr-12">
-				<button
-					class="h-[2rem] flex flex-row items-center rounded-full px-2 focus:outline-none focus:bg-slate-300 focus:scale-110 hover:bg-slate-300 hover:scale-110 active:bg-slate-500 transition duration-150 ease-in"
-					@click="openModal"
-				>
-					<img class="h-full" src="/static/img/cleanup.svg">
-					<span>Clear Completed</span>
-				</button>
-			</div>
 		</section>
 		<script src="/static/js/index.js"></script>
 	</div>
