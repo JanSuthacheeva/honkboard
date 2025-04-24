@@ -12,7 +12,7 @@ func (app *application) routes() http.Handler {
 
 	router := http.NewServeMux()
 
-	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+	router.Handle("GET ./static/", http.StripPrefix("/static", fileServer))
 
 	router.HandleFunc("GET /", app.home)
 	router.HandleFunc("GET /professional", app.showProfessionalTodos)
