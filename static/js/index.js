@@ -1,17 +1,17 @@
 document.addEventListener('alpine:init', () => {
-	Alpine.data('modal', () => {
+	Alpine.data('modals', () => {
 		return {
-			showModal: false,
-			closeModal() {
-				this.showModal = false;
+			showDeleteAllModal: false,
+			closeDeleteAllModal() {
+				this.showDeleteAllModal = false;
 				Array.from(document.getElementsByClassName('list-switcher')).forEach((el) => {
 					el.classList.remove("pointer-events-none");
 					el.classList.remove("blur");
 				});
 				document.getElementsByTagName('footer')[0].classList.remove('pointer-events-none');
 			},
-			openModal() {
-				this.showModal = true;
+			openDeleteAllModal() {
+				this.showDeleteAllModal = true;
 				Array.from(document.getElementsByClassName('list-switcher')).forEach((el) => {
 					el.classList.add("pointer-events-none");
 					el.classList.add("blur");
@@ -19,8 +19,15 @@ document.addEventListener('alpine:init', () => {
 				document.getElementsByTagName('footer')[0].classList.add('pointer-events-none');
 			},
 			get pointerClass() {
-        return this.showModal ? 'pointer-events-none blur' : '';
-      }
+				return this.showDeleteAllModal ? 'pointer-events-none blur' : '';
+			},
+			showDeleteTodoModal: false,
+			closeDeleteTodoModal() {
+				this.showDeleteTodoModal = false;
+			},
+			openDeleteTodoModal() {
+				this.showDeleteTodoModal = true;
+			}
 		}
 	});
 });

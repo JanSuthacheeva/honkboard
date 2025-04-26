@@ -2,7 +2,7 @@
 
 {{define "main"}}
 <section
-	x-data="modal"
+	x-data="modals"
 	id="todo-section"
 	class="w-full h-full"
 >
@@ -34,7 +34,7 @@
 		<script src="/static/js/index.js"></script>
 	</div>
 	<div
-		x-show="showModal"
+		x-show="showDeleteAllModal"
 		x-transition:enter="transition ease-out duration-300"
 		x-transition:enter-start="opacity-0"
 		x-transition:enter-end="opacity-100"
@@ -52,13 +52,13 @@
 		<div class="flex flex-row items-center justify-between px-4 mt-2">
 			<button
 				class="text-white rounded-xl bg-blue-300 px-2 py-1 focus:outline-none focus:bg-blue-500 hover:bg-blue-500 transition duration-150 ease-in"
-				@click="closeModal"
+				@click="closeDeleteAllModal"
 				hx-delete="/todos"
 				hx-target="#todo-list"
 				hx-swap="outerHTML"
 			>Yes</button>
 			<button
-				@click="closeModal"
+				@click="closeDeleteAllModal"
 				class="text-white rounded-xl bg-beak/70 px-2 py-1 focus:outline-none focus:bg-beak hover:bg-beak transition duration-150 ease-in">Nope</button>
 		</div>
 	</div>
