@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 	"time"
 
@@ -46,14 +45,6 @@ func newTestServer(t *testing.T, h http.Handler) *testServer {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	u, _ := url.Parse(ts.URL + "/")
-	jar.SetCookies(u, []*http.Cookie{
-		{
-			Name:  "session_id",
-			Value: "HURENSOHN",
-		}})
-
 	ts.Client().Jar = jar
 
 	ts.Client().CheckRedirect = func(req *http.Request, via []*http.Request) error {
