@@ -14,10 +14,15 @@ func (app *application) routes() http.Handler {
 
 	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
+	// Users
+	router.HandleFunc(http.MethodGet+" /login", app.showLoginForm)
+	router.HandleFunc(http.MethodPost+" /users", app.createUser)
+	router.HandleFunc(http.MethodGet+" /register", app.showRegisterForm)
+
+	// Todos
 	router.HandleFunc("GET /", app.home)
 	router.HandleFunc("GET /professional", app.showProfessionalTodos)
 	router.HandleFunc("GET /personal", app.showPersonalTodos)
-
 	router.HandleFunc("POST /todos", app.createTodo)
 	router.HandleFunc("DELETE /todos/{id}", app.deleteTodo)
 	router.HandleFunc("PATCH /todos/{id}/status", app.toggleTodoStatus)

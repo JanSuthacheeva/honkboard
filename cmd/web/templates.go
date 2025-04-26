@@ -15,6 +15,7 @@ type templateData struct {
 	ListType string
 	Errors   []string
 	Form     any
+	User     *models.User
 }
 
 func countDoneTodos(todos []models.Todo) int {
