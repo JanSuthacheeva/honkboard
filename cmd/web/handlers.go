@@ -146,14 +146,21 @@ func (app *application) toggleTodoStatus(w http.ResponseWriter, r *http.Request)
 		app.sessionManager.Put(r.Context(), "list-type", "Personal")
 	}
 
+	todos, err := app.todos.GetAll(listType)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
 	data := templateData{
 		ListType: listType,
 		ID:       todo.ID,
 		Title:    todo.Title,
 		Status:   todo.Status.String(),
+		Todos:    todos,
 	}
 
-	app.render(w, r, http.StatusOK, "index.html", "todo-row", data)
+	app.render(w, r, http.StatusOK, "index.html", "todo-row-swap", data)
 }
 
 func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
@@ -218,7 +225,6 @@ func (app *application) deleteCompletedTodos(w http.ResponseWriter, r *http.Requ
 			return
 		}
 	}
-
 	todos, err := app.todos.GetAll(listType)
 	if err != nil {
 		app.serverError(w, r, err)

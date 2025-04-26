@@ -17,6 +17,20 @@ type templateData struct {
 	Form     any
 }
 
+func countDoneTodos(todos []models.Todo) int {
+	count := 0
+	for _, todo := range todos {
+		if todo.Status == "done" {
+			count++
+		}
+	}
+	return count
+}
+
+var functions = template.FuncMap{
+	"countDoneTodos": countDoneTodos,
+}
+
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
@@ -28,17 +42,16 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		partials, err := filepath.Glob("./ui/html/partials/*.html")
+		ts, err := template.New(name).Funcs(functions).ParseFiles("./ui/html/base.html")
 		if err != nil {
 			return nil, err
 		}
-		files := []string{
-			"./ui/html/base.html",
-			page,
+		ts, err = ts.ParseGlob("./ui/html/partials/*.html")
+		if err != nil {
+			return nil, err
 		}
-		files = append(files, partials...)
 
-		ts, err := template.ParseFiles(files...)
+		ts, err = ts.ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}

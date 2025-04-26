@@ -1,0 +1,11 @@
+{{define "todo-row-swap"}}
+{{template "todo-row" .}}
+<button id="completed-button" hx-swap-oob="true"
+	class="h-[2rem] flex flex-row items-center rounded-full px-2 focus:outline-none focus:bg-slate-300 focus:scale-110 hover:bg-slate-300 hover:scale-110 active:bg-slate-500 disabled:hover:scale-100 disabled:hover:bg-transparent transition duration-150 ease-in"
+	{{if eq (countDoneTodos .Todos) 0 }} disabled {{ end }}
+	@click="openDeleteAllModal"
+>
+	<img class="h-full" src="/static/img/cleanup.svg">
+	<span>Clear Completed ({{countDoneTodos .Todos}})</span>
+</button>
+{{end}}

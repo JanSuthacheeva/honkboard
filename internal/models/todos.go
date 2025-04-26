@@ -9,6 +9,14 @@ import (
 	"github.com/jansuthacheeva/honkboard/internal/enums"
 )
 
+type TodoModelInterface interface {
+	Insert(title, typeString string) (int, error)
+	Delete(id int) error
+	DeleteCompleted(listType string) error
+	ToggleStatus(id int) (Todo, error)
+	GetAll(listType string) ([]Todo, error)
+}
+
 type Todo struct {
 	ID      int
 	Title   string

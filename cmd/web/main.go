@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -20,7 +21,7 @@ import (
 type application struct {
 	cfg            config
 	logger         *slog.Logger
-	todos          *models.TodoModel
+	todos          models.TodoModelInterface
 	sessionManager *scs.SessionManager
 	templateCache  map[string]*template.Template
 }
@@ -73,9 +74,23 @@ func main() {
 		templateCache:  templateCache,
 	}
 
-	app.logger.Info("Starting server", slog.String("addr", cfg.addr))
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
 
-	err = http.ListenAndServe(cfg.addr, app.routes())
+	srv := &http.Server{
+		Addr:         cfg.addr,
+		Handler:      app.routes(),
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	app.logger.Info("Starting server", slog.String("addr", srv.Addr))
+
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
 	logger.Error(err.Error())
 	os.Exit(1)
