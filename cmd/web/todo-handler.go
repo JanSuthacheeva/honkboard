@@ -10,8 +10,8 @@ import (
 )
 
 type createTodoForm struct {
-	Title string
-	validator.Validator
+	Title               string `form:"title"`
+	validator.Validator `form:"-"`
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -74,16 +74,16 @@ func (app *application) showProfessionalTodos(w http.ResponseWriter, r *http.Req
 }
 
 func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+
+	var form createTodoForm
+
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	listType := app.sessionManager.GetString(r.Context(), "list-type")
 
-	form := createTodoForm{
-		Title: r.PostForm.Get("title"),
-	}
+	listType := app.sessionManager.GetString(r.Context(), "list-type")
 
 	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Title, 80), "title", "This field cannot be more than 80 characters long")

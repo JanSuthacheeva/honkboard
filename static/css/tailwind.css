@@ -582,6 +582,34 @@ video {
   top: -3rem;
 }
 
+.top-8 {
+  top: 2rem;
+}
+
+.top-14 {
+  top: 3.5rem;
+}
+
+.top-16 {
+  top: 4rem;
+}
+
+.top-\[2\.5rem\] {
+  top: 2.5rem;
+}
+
+.top-\[3\.5rem\] {
+  top: 3.5rem;
+}
+
+.top-\[3\.75rem\] {
+  top: 3.75rem;
+}
+
+.top-\[3\.65rem\] {
+  top: 3.65rem;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -600,6 +628,10 @@ video {
 
 .mt-2 {
   margin-top: 0.5rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
 }
 
 .flex {
@@ -926,6 +958,10 @@ video {
 
 .pb-\[4rem\] {
   padding-bottom: 4rem;
+}
+
+.pt-1 {
+  padding-top: 0.25rem;
 }
 
 .text-center {
