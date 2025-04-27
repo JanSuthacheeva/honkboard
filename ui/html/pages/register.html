@@ -43,8 +43,9 @@
 				class="text-white rounded-xl bg-blue-300 px-2 py-1 focus:outline-none focus:bg-blue-500 hover:bg-blue-500 transition duration-150 ease-in"
 				value="Register"
 				hx-post="/users"
-				hx-target="main"
+				hx-target="body"
 				hx-swap="innerHTML"
+				hx-push-url="true"
 			>
 		</p>
 	</form>

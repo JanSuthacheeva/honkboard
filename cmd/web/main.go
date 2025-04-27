@@ -23,6 +23,7 @@ type application struct {
 	cfg            config
 	logger         *slog.Logger
 	todos          models.TodoModelInterface
+	users          *models.UserModel
 	sessionManager *scs.SessionManager
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
@@ -74,6 +75,7 @@ func main() {
 		cfg:            cfg,
 		logger:         logger,
 		todos:          &models.TodoModel{DB: db},
+		users:          &models.UserModel{DB: db},
 		sessionManager: sessionManager,
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
