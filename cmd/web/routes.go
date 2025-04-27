@@ -19,6 +19,7 @@ func (app *application) routes() http.Handler {
 	router.HandleFunc(http.MethodPost+" /sessions", app.createSession)
 	router.HandleFunc(http.MethodGet+" /register", app.showRegisterForm)
 	router.HandleFunc(http.MethodPost+" /users", app.createUser)
+	router.HandleFunc(http.MethodDelete+" /sessions", app.deleteSession)
 
 	// Todos
 	router.HandleFunc("GET /", app.home)

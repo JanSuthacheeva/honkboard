@@ -120,6 +120,17 @@ func (app *application) createSession(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (app *application) deleteSession(w http.ResponseWriter, r *http.Request) {
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
 func (app *application) showLoginForm(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
 		Form: loginForm{},
