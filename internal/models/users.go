@@ -23,32 +23,6 @@ type UserModel struct {
 	DB *sql.DB
 }
 
-func (m *UserModel) Insert(name, email, password string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if err != nil {
-		return err
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	query := `INSERT INTO users (name, email, hashed_password, created)
-	VALUES(?, ?, ?, UTC_TIMESTAMP())`
-
-	_, err = m.DB.ExecContext(ctx, query, name, email, string(hashedPassword))
-	if err != nil {
-		var mySQLError *mysql.MySQLError
-		if errors.As(err, &mySQLError) {
-			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users_uc_email") {
-				return ErrDuplicateEmail
-			}
-		}
-		return err
-	}
-
-	return nil
-}
-
 func (m *UserModel) Authenticate(email, password string) (int, error) {
 
 	var id int
@@ -78,4 +52,43 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	}
 
 	return id, nil
+}
+
+func (m *UserModel) Exists(id int) (bool, error) {
+	var exists bool
+
+	query := `SELECT EXISTS(SELECT true FROM users WHERE id = ?)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(&exists)
+
+	return exists, err
+}
+
+func (m *UserModel) Insert(name, email, password string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `INSERT INTO users (name, email, hashed_password, created)
+	VALUES(?, ?, ?, UTC_TIMESTAMP())`
+
+	_, err = m.DB.ExecContext(ctx, query, name, email, string(hashedPassword))
+	if err != nil {
+		var mySQLError *mysql.MySQLError
+		if errors.As(err, &mySQLError) {
+			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users_uc_email") {
+				return ErrDuplicateEmail
+			}
+		}
+		return err
+	}
+
+	return nil
 }
