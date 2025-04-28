@@ -16,6 +16,7 @@
 		<body
 			class="relative text-slate-900 flex flex-col font-fredoka h-screen overflow-hidden"
 			hx-boost
+		hx-headers='{"X-CSRF-TOKEN": "{{.CSRFToken}}"}'
 		>
 				<header class="flex flex-col w-full bg-feathers-dark relative">
 					<div class="flex flex-row justify-center items-center gap-2 h-[4.5rem]">
@@ -29,7 +30,8 @@
 									class="rounded-full px-2 py-0.5 focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher"
 									hx-delete="/sessions"
 									hx-target="body"
-								>Logout</button>
+								>
+						Logout</button>
 							{{else}}
 								<a class="rounded-full px-2 py-0.5 focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher" href="/login">Login</a>
 								<a class="rounded-full px-2 py-0.5 focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher" href="/register">Register</a>

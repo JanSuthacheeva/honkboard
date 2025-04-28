@@ -17,6 +17,7 @@ type templateData struct {
 	Form            any
 	User            *models.User
 	IsAuthenticated bool
+	CSRFToken       string
 }
 
 func countDoneTodos(todos []models.Todo) int {

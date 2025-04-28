@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 
 	"github.com/go-playground/form/v4"
+	"github.com/justinas/nosurf"
 )
 
 func (app *application) clientError(w http.ResponseWriter, status int) {
@@ -41,6 +42,7 @@ func (app *application) isAuthenticated(r *http.Request) bool {
 func (app *application) newTemplateData(r *http.Request) templateData {
 	return templateData{
 		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 }
 

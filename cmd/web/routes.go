@@ -14,7 +14,7 @@ func (app *application) routes() http.Handler {
 
 	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	dynamic := alice.New(app.sessionManager.LoadAndSave)
+	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf)
 	// Users
 	router.Handle(http.MethodGet+" /login", dynamic.ThenFunc(app.showLoginForm))
 	router.Handle(http.MethodPost+" /sessions", dynamic.ThenFunc(app.createSession))
