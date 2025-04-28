@@ -46,9 +46,8 @@ func (app *application) createUser(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.Equal(form.Password, form.PasswordConfirm), "password_confirm", "This field must equal the password field")
 
 	if !form.Valid() {
-		data := templateData{
-			Form: form,
-		}
+		data := app.newTemplateData(r)
+		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "register.html", "main", data)
 		return
 	}
@@ -57,9 +56,8 @@ func (app *application) createUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, models.ErrDuplicateEmail) {
 			form.AddFieldError("email", "Email address is already in use")
-			data := templateData{
-				Form: form,
-			}
+			data := app.newTemplateData(r)
+			data.Form = form
 			app.render(w, r, http.StatusUnprocessableEntity, "register.html", "base", data)
 		} else {
 			app.serverError(w, r, err)
@@ -86,9 +84,8 @@ func (app *application) createSession(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.ValidPassword(form.Password), "password", "This field must have at least 1 of each: upper case, lower case, number, special char")
 
 	if !form.Valid() {
-		data := templateData{
-			Form: form,
-		}
+		data := app.newTemplateData(r)
+		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "login.html", "base", data)
 		return
 	}
@@ -97,10 +94,8 @@ func (app *application) createSession(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, models.ErrInvalidCredentials) {
 			form.AddNonFieldError("email or password incorrect")
-			data := templateData{
-				Form: form,
-			}
-
+			data := app.newTemplateData(r)
+			data.Form = form
 			app.render(w, r, http.StatusUnprocessableEntity, "login.html", "base", data)
 		} else {
 			app.serverError(w, r, err)
@@ -132,15 +127,13 @@ func (app *application) deleteSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) showLoginForm(w http.ResponseWriter, r *http.Request) {
-	data := templateData{
-		Form: loginForm{},
-	}
+	data := app.newTemplateData(r)
+	data.Form = loginForm{}
 	app.render(w, r, http.StatusOK, "login.html", "base", data)
 }
 
 func (app *application) showRegisterForm(w http.ResponseWriter, r *http.Request) {
-	data := templateData{
-		Form: registerForm{},
-	}
+	data := app.newTemplateData(r)
+	data.Form = registerForm{}
 	app.render(w, r, http.StatusOK, "register.html", "base", data)
 }

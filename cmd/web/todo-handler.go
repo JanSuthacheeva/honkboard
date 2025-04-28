@@ -30,11 +30,11 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := templateData{
-		Todos:    todos,
-		ListType: listType,
-		Form:     createTodoForm{},
-	}
+	data := app.newTemplateData(r)
+
+	data.Todos = todos
+	data.ListType = listType
+	data.Form = createTodoForm{}
 
 	app.render(w, r, http.StatusOK, "index.html", "base", data)
 }
@@ -46,10 +46,9 @@ func (app *application) showPersonalTodos(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	data := templateData{
-		Todos:    todos,
-		ListType: "Personal",
-	}
+	data := app.newTemplateData(r)
+	data.Todos = todos
+	data.ListType = "Personal"
 
 	app.sessionManager.Put(r.Context(), "list-type", "Personal")
 
@@ -63,10 +62,9 @@ func (app *application) showProfessionalTodos(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	data := templateData{
-		Todos:    todos,
-		ListType: "Professional",
-	}
+	data := app.newTemplateData(r)
+	data.Todos = todos
+	data.ListType = "Professional"
 
 	app.sessionManager.Put(r.Context(), "list-type", "Professional")
 
@@ -88,17 +86,18 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Title, 80), "title", "This field cannot be more than 80 characters long")
 
+	data := app.newTemplateData(r)
+
 	if !form.Valid() {
 		todos, err := app.todos.GetAll(listType)
 		if err != nil {
 			app.serverError(w, r, err)
 			return
 		}
-		data := templateData{
-			Todos:    todos,
-			Form:     form,
-			ListType: listType,
-		}
+		data.Todos = todos
+		data.Form = form
+		data.ListType = listType
+
 		app.render(w, r, http.StatusUnprocessableEntity, "index.html", "main", data)
 		return
 	}
@@ -115,11 +114,9 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := templateData{
-		Todos:    todos,
-		ListType: listType,
-		Form:     createTodoForm{},
-	}
+	data.Todos = todos
+	data.Form = createTodoForm{}
+	data.ListType = listType
 
 	app.render(w, r, http.StatusCreated, "index.html", "main", data)
 }
@@ -152,13 +149,12 @@ func (app *application) toggleTodoStatus(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	data := templateData{
-		ListType: listType,
-		ID:       todo.ID,
-		Title:    todo.Title,
-		Status:   todo.Status.String(),
-		Todos:    todos,
-	}
+	data := app.newTemplateData(r)
+	data.ListType = listType
+	data.ID = todo.ID
+	data.Title = todo.Title
+	data.Status = todo.Status.String()
+	data.Todos = todos
 
 	app.render(w, r, http.StatusOK, "index.html", "todo-row-swap", data)
 }
@@ -194,10 +190,9 @@ func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := templateData{
-		Todos:    todos,
-		ListType: listType,
-	}
+	data := app.newTemplateData(r)
+	data.Todos = todos
+	data.ListType = listType
 
 	app.render(w, r, http.StatusOK, "index.html", "todo-list", data)
 }
@@ -209,9 +204,8 @@ func (app *application) deleteCompletedTodos(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	data := templateData{
-		ListType: listType,
-	}
+	data := app.newTemplateData(r)
+	data.ListType = listType
 
 	err := app.todos.DeleteCompleted(listType)
 	if err != nil {
@@ -236,7 +230,6 @@ func (app *application) deleteCompletedTodos(w http.ResponseWriter, r *http.Requ
 	if data.Errors != nil {
 		app.render(w, r, http.StatusUnprocessableEntity, "index.html", "todo-list", data)
 	} else {
-
 		app.render(w, r, http.StatusOK, "index.html", "todo-list", data)
 	}
 }

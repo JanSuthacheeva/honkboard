@@ -24,17 +24,22 @@
 					</div>
 					<div>
 						<nav class="absolute flex h-[1.5rem] items-center text-lg w-full justify-end gap-4 right-10 bottom-1">
-								<a class="rounded-full px-2 py-0.5 focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher" href="/login">Login</a>
-								<a class="rounded-full px-2 py-0.5 focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher" href="/register">Register</a>
+							{{if .IsAuthenticated}}
 								<button
 									class="rounded-full px-2 py-0.5 focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher"
 									hx-delete="/sessions"
 									hx-target="body"
-					>Logout</a>
+								>Logout</button>
+							{{else}}
+								<a class="rounded-full px-2 py-0.5 focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher" href="/login">Login</a>
+								<a class="rounded-full px-2 py-0.5 focus:outline-none focus:bg-beak/30 hover:bg-beak/30 active:bg-beak/70 transition duration-150 ease-in list-switcher" href="/register">Register</a>
+							{{end}}
 						</nav>
 					</div>
 				</header>
-				{{template "nav" .}}
+				{{if .IsAuthenticated}}
+					{{template "nav" .}}
+				{{end}}
 				<main class="w-full flex-grow overflow-y-scroll flex">
 					{{template "main" .}}
 				</main>

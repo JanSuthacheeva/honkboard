@@ -8,14 +8,15 @@ import (
 )
 
 type templateData struct {
-	Todos    []models.Todo
-	ID       int
-	Title    string
-	Status   string
-	ListType string
-	Errors   []string
-	Form     any
-	User     *models.User
+	Todos           []models.Todo
+	ID              int
+	Title           string
+	Status          string
+	ListType        string
+	Errors          []string
+	Form            any
+	User            *models.User
+	IsAuthenticated bool
 }
 
 func countDoneTodos(todos []models.Todo) int {

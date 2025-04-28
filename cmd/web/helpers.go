@@ -34,6 +34,16 @@ func (app *application) decodePostForm(r *http.Request, dst any) error {
 	return nil
 }
 
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.sessionManager.Exists(r.Context(), "authenticatedUserID")
+}
+
+func (app *application) newTemplateData(r *http.Request) templateData {
+	return templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	}
+}
+
 func (app *application) notFound(w http.ResponseWriter, r *http.Request) {
 	var (
 		method = r.Method

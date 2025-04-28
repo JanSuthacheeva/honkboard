@@ -14,22 +14,25 @@ func (app *application) routes() http.Handler {
 
 	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
+	dynamic := alice.New(app.sessionManager.LoadAndSave)
 	// Users
-	router.HandleFunc(http.MethodGet+" /login", app.showLoginForm)
-	router.HandleFunc(http.MethodPost+" /sessions", app.createSession)
-	router.HandleFunc(http.MethodGet+" /register", app.showRegisterForm)
-	router.HandleFunc(http.MethodPost+" /users", app.createUser)
-	router.HandleFunc(http.MethodDelete+" /sessions", app.deleteSession)
+	router.Handle(http.MethodGet+" /login", dynamic.ThenFunc(app.showLoginForm))
+	router.Handle(http.MethodPost+" /sessions", dynamic.ThenFunc(app.createSession))
+	router.Handle(http.MethodGet+" /register", dynamic.ThenFunc(app.showRegisterForm))
+	router.Handle(http.MethodPost+" /users", dynamic.ThenFunc(app.createUser))
 
+	protected := dynamic.Append(app.requireAuthentication)
 	// Todos
-	router.HandleFunc("GET /", app.home)
-	router.HandleFunc("GET /professional", app.showProfessionalTodos)
-	router.HandleFunc("GET /personal", app.showPersonalTodos)
-	router.HandleFunc("POST /todos", app.createTodo)
-	router.HandleFunc("DELETE /todos/{id}", app.deleteTodo)
-	router.HandleFunc("PATCH /todos/{id}/status", app.toggleTodoStatus)
-	router.HandleFunc("DELETE /todos", app.deleteCompletedTodos)
-	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders, app.sessionManager.LoadAndSave)
+	router.Handle(http.MethodDelete+" /sessions", dynamic.ThenFunc(app.deleteSession))
+	router.Handle("GET /", protected.ThenFunc(app.home))
+	router.Handle("GET /professional", protected.ThenFunc(app.showProfessionalTodos))
+	router.Handle("GET /personal", protected.ThenFunc(app.showPersonalTodos))
+	router.Handle("POST /todos", protected.ThenFunc(app.createTodo))
+	router.Handle("DELETE /todos/{id}", protected.ThenFunc(app.deleteTodo))
+	router.Handle("PATCH /todos/{id}/status", protected.ThenFunc(app.toggleTodoStatus))
+	router.Handle("DELETE /todos", protected.ThenFunc(app.deleteCompletedTodos))
+
+	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 
 	return standard.Then(router)
 }
