@@ -31,6 +31,8 @@ type TodoModel struct {
 
 func (m *TodoModel) Insert(userId int, title, typeString string) (int, error) {
 
+	const maxNumberOfTodos int = 20
+
 	todoType, ok := enums.ParseTodoType(typeString)
 	if !ok {
 		return 0, ErrUnknownType
@@ -49,7 +51,7 @@ func (m *TodoModel) Insert(userId int, title, typeString string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	if numOfTodos >= 20 {
+	if numOfTodos >= maxNumberOfTodos {
 		return 0, ErrMaxTodos
 	}
 
