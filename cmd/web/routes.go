@@ -15,11 +15,13 @@ func (app *application) routes() http.Handler {
 	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
+
+	public := dynamic.Append(app.noAuth)
 	// Users
-	router.Handle(http.MethodGet+" /login", dynamic.ThenFunc(app.showLoginForm))
-	router.Handle(http.MethodPost+" /sessions", dynamic.ThenFunc(app.createSession))
-	router.Handle(http.MethodGet+" /register", dynamic.ThenFunc(app.showRegisterForm))
-	router.Handle(http.MethodPost+" /users", dynamic.ThenFunc(app.createUser))
+	router.Handle(http.MethodGet+" /login", public.ThenFunc(app.showLoginForm))
+	router.Handle(http.MethodPost+" /sessions", public.ThenFunc(app.createSession))
+	router.Handle(http.MethodGet+" /register", public.ThenFunc(app.showRegisterForm))
+	router.Handle(http.MethodPost+" /users", public.ThenFunc(app.createUser))
 
 	protected := dynamic.Append(app.requireAuthentication)
 	// Todos

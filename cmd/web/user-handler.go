@@ -112,7 +112,6 @@ func (app *application) createSession(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-
 }
 
 func (app *application) deleteSession(w http.ResponseWriter, r *http.Request) {
