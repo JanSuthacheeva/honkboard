@@ -108,8 +108,23 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 
 	_, err = app.todos.Insert(id, form.Title, listType)
 	if err != nil {
-		app.serverError(w, r, err)
-		return
+		switch {
+		case errors.Is(err, models.ErrMaxTodos):
+			form.AddFieldError("title", "Maximum number of todos reached for this list")
+			todos, err := app.todos.GetAll(id, listType)
+			if err != nil {
+				app.serverError(w, r, err)
+				return
+			}
+			data.Todos = todos
+			data.Form = form
+			data.ListType = listType
+			app.render(w, r, http.StatusUnprocessableEntity, "index.html", "main", data)
+			return
+		default:
+			app.serverError(w, r, err)
+			return
+		}
 	}
 
 	todos, err := app.todos.GetAll(id, listType)

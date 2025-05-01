@@ -36,11 +36,25 @@ func (m *TodoModel) Insert(userId int, title, typeString string) (int, error) {
 		return 0, ErrUnknownType
 	}
 
-	query := `INSERT INTO todos (title, status, type, created, user_id)
-		VALUES(?, "not done", ?, UTC_TIMESTAMP(), ?)`
+	countQuery := `SELECT COUNT(id) FROM todos
+		WHERE type = ?
+		AND user_id = ?`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+
+	var numOfTodos int
+
+	err := m.DB.QueryRowContext(ctx, countQuery, todoType.String(), userId).Scan(&numOfTodos)
+	if err != nil {
+		return 0, err
+	}
+	if numOfTodos >= 20 {
+		return 0, ErrMaxTodos
+	}
+
+	query := `INSERT INTO todos (title, status, type, created, user_id)
+		VALUES(?, "not done", ?, UTC_TIMESTAMP(), ?)`
 
 	result, err := m.DB.ExecContext(ctx, query, title, todoType.String(), userId)
 	if err != nil {
