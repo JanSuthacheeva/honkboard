@@ -10,4 +10,5 @@ var (
 	ErrUnknownType        = errors.New("todos: error parsing type string")
 	ErrDuplicateEmail     = errors.New("users: duplicate email found")
 	ErrInvalidCredentials = errors.New("users: invalid credentials")
+	ErrUnknownAuth        = errors.New("users: unexpected auth error")
 )

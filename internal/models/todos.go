@@ -10,11 +10,11 @@ import (
 )
 
 type TodoModelInterface interface {
-	Insert(title, typeString string) (int, error)
-	Delete(id int) error
-	DeleteCompleted(listType string) error
-	ToggleStatus(id int) (Todo, error)
-	GetAll(listType string) ([]Todo, error)
+	Insert(userId int, title, typeString string) (int, error)
+	Delete(userId, id int) error
+	DeleteCompleted(userId int, listType string) error
+	ToggleStatus(userId, id int) (Todo, error)
+	GetAll(userId int, listType string) ([]Todo, error)
 }
 
 type Todo struct {
@@ -29,20 +29,20 @@ type TodoModel struct {
 	DB *sql.DB
 }
 
-func (m *TodoModel) Insert(title, typeString string) (int, error) {
+func (m *TodoModel) Insert(userId int, title, typeString string) (int, error) {
 
 	todoType, ok := enums.ParseTodoType(typeString)
 	if !ok {
 		return 0, ErrUnknownType
 	}
 
-	query := `INSERT INTO todos (title, status, type, created)
-		VALUES(?, "not done", ?, UTC_TIMESTAMP())`
+	query := `INSERT INTO todos (title, status, type, created, user_id)
+		VALUES(?, "not done", ?, UTC_TIMESTAMP(), ?)`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	result, err := m.DB.ExecContext(ctx, query, title, todoType.String())
+	result, err := m.DB.ExecContext(ctx, query, title, todoType.String(), userId)
 	if err != nil {
 		return 0, err
 	}
@@ -55,18 +55,19 @@ func (m *TodoModel) Insert(title, typeString string) (int, error) {
 	return int(id), nil
 }
 
-func (m *TodoModel) Delete(id int) error {
+func (m *TodoModel) Delete(userId, id int) error {
 	if id <= 0 {
 		return ErrNoRecord
 	}
 
 	query := `DELETE FROM todos
-			WHERE id = ?`
+			WHERE id = ?
+			AND user_id = ?`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	result, err := m.DB.ExecContext(ctx, query, id)
+	result, err := m.DB.ExecContext(ctx, query, id, userId)
 	if err != nil {
 		return err
 	}
@@ -83,7 +84,7 @@ func (m *TodoModel) Delete(id int) error {
 	return nil
 }
 
-func (m *TodoModel) DeleteCompleted(listType string) error {
+func (m *TodoModel) DeleteCompleted(userId int, listType string) error {
 
 	todoType, ok := enums.ParseTodoType(listType)
 	if !ok {
@@ -92,12 +93,13 @@ func (m *TodoModel) DeleteCompleted(listType string) error {
 
 	query := `DELETE FROM todos
 			WHERE type = ?
-			AND status = "done"`
+			AND status = "done"
+			AND user_id = ?`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	result, err := m.DB.ExecContext(ctx, query, todoType.String())
+	result, err := m.DB.ExecContext(ctx, query, todoType.String(), userId)
 	if err != nil {
 		return err
 	}
@@ -114,7 +116,7 @@ func (m *TodoModel) DeleteCompleted(listType string) error {
 	return nil
 }
 
-func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
+func (m *TodoModel) ToggleStatus(userId, id int) (Todo, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -127,11 +129,12 @@ func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
 	defer tx.Rollback()
 
 	statusQuery := `SELECT status FROM todos
-		WHERE id = ?`
+		WHERE id = ?
+		AND user_id = ?`
 
 	var statusString string
 
-	row := tx.QueryRowContext(ctx, statusQuery, id)
+	row := tx.QueryRowContext(ctx, statusQuery, id, userId)
 	err = row.Scan(&statusString)
 
 	oldStatus, ok := enums.ParseTodoStatus(statusString)
@@ -150,9 +153,10 @@ func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
 	}
 
 	updateQuery := `UPDATE todos SET status = ?
-		WHERE id = ?`
+		WHERE id = ?
+		AND user_id = ?`
 
-	result, err := tx.ExecContext(ctx, updateQuery, status.String(), id)
+	result, err := tx.ExecContext(ctx, updateQuery, status.String(), id, userId)
 	if err != nil {
 		return Todo{}, err
 	}
@@ -166,9 +170,9 @@ func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
 		return Todo{}, ErrNoRecord
 	}
 
-	getQuery := `SELECT id, title, status, created FROM todos WHERE id = ?`
+	getQuery := `SELECT id, title, status, created FROM todos WHERE id = ? AND user_id = ?`
 
-	row = tx.QueryRowContext(ctx, getQuery, id)
+	row = tx.QueryRowContext(ctx, getQuery, id, userId)
 
 	var todo Todo
 	err = row.Scan(&todo.ID, &todo.Title, &todo.Status, &todo.Created)
@@ -187,7 +191,7 @@ func (m *TodoModel) ToggleStatus(id int) (Todo, error) {
 	return todo, nil
 }
 
-func (m *TodoModel) GetAll(listType string) ([]Todo, error) {
+func (m *TodoModel) GetAll(userId int, listType string) ([]Todo, error) {
 
 	todoType, ok := enums.ParseTodoType(listType)
 	if !ok {
@@ -195,12 +199,13 @@ func (m *TodoModel) GetAll(listType string) ([]Todo, error) {
 	}
 
 	query := `SELECT id, title, status, created FROM todos
-			WHERE type = ?`
+			WHERE type = ?
+			AND user_id = ?`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query, todoType.String())
+	rows, err := m.DB.QueryContext(ctx, query, todoType.String(), userId)
 	if err != nil {
 		return nil, err
 	}

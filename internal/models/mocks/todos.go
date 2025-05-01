@@ -17,11 +17,11 @@ var mockTodo = models.Todo{
 
 type TodoModel struct{}
 
-func (m *TodoModel) Insert(title, typeString string) (int, error) {
+func (m *TodoModel) Insert(userId int, title, typeString string) (int, error) {
 	return 2, nil
 }
 
-func (m *TodoModel) Delete(id int) error {
+func (m *TodoModel) Delete(userId, id int) error {
 	switch {
 	case id == 1:
 		return nil
@@ -30,7 +30,7 @@ func (m *TodoModel) Delete(id int) error {
 	}
 }
 
-func (m *TodoModel) DeleteCompleted(listType string) error {
+func (m *TodoModel) DeleteCompleted(userId int, listType string) error {
 	switch {
 	case listType == enums.TodoTypePersonal.String():
 		return nil
@@ -58,7 +58,7 @@ func (m *TodoModel) ToggleStatus(id int) (models.Todo, error) {
 	}
 }
 
-func (m *TodoModel) GetAll(listType string) ([]models.Todo, error) {
+func (m *TodoModel) GetAll(userId int, listType string) ([]models.Todo, error) {
 	var todos []models.Todo
 	switch {
 	case listType == enums.TodoTypePersonal.String():

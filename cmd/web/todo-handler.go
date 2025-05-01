@@ -16,14 +16,15 @@ type createTodoForm struct {
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	listType := app.sessionManager.GetString(r.Context(), "list-type")
+	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 
 	var todos []models.Todo
 	var err error
 	if listType == "" {
 		app.sessionManager.Put(r.Context(), "list-type", "Personal")
-		todos, err = app.todos.GetAll("Personal")
+		todos, err = app.todos.GetAll(id, "Personal")
 	} else {
-		todos, err = app.todos.GetAll(listType)
+		todos, err = app.todos.GetAll(id, listType)
 	}
 	if err != nil {
 		app.serverError(w, r, err)
@@ -40,7 +41,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) showPersonalTodos(w http.ResponseWriter, r *http.Request) {
-	todos, err := app.todos.GetAll("Personal")
+	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	todos, err := app.todos.GetAll(id, "Personal")
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -56,7 +58,8 @@ func (app *application) showPersonalTodos(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) showProfessionalTodos(w http.ResponseWriter, r *http.Request) {
-	todos, err := app.todos.GetAll("Professional")
+	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	todos, err := app.todos.GetAll(id, "Professional")
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -82,6 +85,7 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	listType := app.sessionManager.GetString(r.Context(), "list-type")
+	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 
 	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Title, 80), "title", "This field cannot be more than 80 characters long")
@@ -89,7 +93,7 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 
 	if !form.Valid() {
-		todos, err := app.todos.GetAll(listType)
+		todos, err := app.todos.GetAll(id, listType)
 		if err != nil {
 			app.serverError(w, r, err)
 			return
@@ -102,13 +106,13 @@ func (app *application) createTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = app.todos.Insert(form.Title, listType)
+	_, err = app.todos.Insert(id, form.Title, listType)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	todos, err := app.todos.GetAll(listType)
+	todos, err := app.todos.GetAll(id, listType)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -132,7 +136,12 @@ func (app *application) toggleTodoStatus(w http.ResponseWriter, r *http.Request)
 		app.notFound(w, r)
 		return
 	}
-	todo, err := app.todos.ToggleStatus(id)
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	if userId == 0 {
+		app.serverError(w, r, models.ErrUnknownAuth)
+		return
+	}
+	todo, err := app.todos.ToggleStatus(userId, id)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -143,7 +152,7 @@ func (app *application) toggleTodoStatus(w http.ResponseWriter, r *http.Request)
 		app.sessionManager.Put(r.Context(), "list-type", "Personal")
 	}
 
-	todos, err := app.todos.GetAll(listType)
+	todos, err := app.todos.GetAll(userId, listType)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -172,8 +181,13 @@ func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w, r)
 		return
 	}
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	if userId == 0 {
+		app.serverError(w, r, models.ErrUnknownAuth)
+		return
+	}
 
-	err = app.todos.Delete(id)
+	err = app.todos.Delete(userId, id)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -181,9 +195,9 @@ func (app *application) deleteTodo(w http.ResponseWriter, r *http.Request) {
 	listType := app.sessionManager.GetString(r.Context(), "list-type")
 	if listType == "" {
 		app.sessionManager.Put(r.Context(), "list-type", "Personal")
-		todos, err = app.todos.GetAll("Personal")
+		todos, err = app.todos.GetAll(userId, "Personal")
 	} else {
-		todos, err = app.todos.GetAll(listType)
+		todos, err = app.todos.GetAll(userId, listType)
 	}
 	if err != nil {
 		app.serverError(w, r, err)
@@ -203,11 +217,16 @@ func (app *application) deleteCompletedTodos(w http.ResponseWriter, r *http.Requ
 		app.serverError(w, r, errors.New("session: list-type not found."))
 		return
 	}
+	userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	if userId == 0 {
+		app.serverError(w, r, models.ErrUnknownAuth)
+		return
+	}
 
 	data := app.newTemplateData(r)
 	data.ListType = listType
 
-	err := app.todos.DeleteCompleted(listType)
+	err := app.todos.DeleteCompleted(userId, listType)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrNoRecord):
@@ -219,7 +238,7 @@ func (app *application) deleteCompletedTodos(w http.ResponseWriter, r *http.Requ
 			return
 		}
 	}
-	todos, err := app.todos.GetAll(listType)
+	todos, err := app.todos.GetAll(userId, listType)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
