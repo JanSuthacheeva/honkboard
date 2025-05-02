@@ -13,6 +13,7 @@ import (
 
 	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jansuthacheeva/honkboard/internal/models"
 	"github.com/joho/godotenv"
@@ -22,8 +23,10 @@ type application struct {
 	cfg            config
 	logger         *slog.Logger
 	todos          models.TodoModelInterface
+	users          *models.UserModel
 	sessionManager *scs.SessionManager
 	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
 }
 
 type config struct {
@@ -66,12 +69,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	formDecoder := form.NewDecoder()
+
 	app := application{
 		cfg:            cfg,
 		logger:         logger,
 		todos:          &models.TodoModel{DB: db},
+		users:          &models.UserModel{DB: db},
 		sessionManager: sessionManager,
 		templateCache:  templateCache,
+		formDecoder:    formDecoder,
 	}
 
 	tlsConfig := &tls.Config{

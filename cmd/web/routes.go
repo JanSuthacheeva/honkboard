@@ -14,15 +14,28 @@ func (app *application) routes() http.Handler {
 
 	router.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	router.HandleFunc("GET /", app.home)
-	router.HandleFunc("GET /professional", app.showProfessionalTodos)
-	router.HandleFunc("GET /personal", app.showPersonalTodos)
+	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
+	router.Handle(http.MethodGet+" /", dynamic.ThenFunc(app.landingPage))
 
-	router.HandleFunc("POST /todos", app.createTodo)
-	router.HandleFunc("DELETE /todos/{id}", app.deleteTodo)
-	router.HandleFunc("PATCH /todos/{id}/status", app.toggleTodoStatus)
-	router.HandleFunc("DELETE /todos", app.deleteCompletedTodos)
-	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders, app.sessionManager.LoadAndSave)
+	public := dynamic.Append(app.noAuth)
+	// Users
+	router.Handle(http.MethodGet+" /login", public.ThenFunc(app.showLoginForm))
+	router.Handle(http.MethodPost+" /sessions", public.ThenFunc(app.createSession))
+	router.Handle(http.MethodGet+" /register", public.ThenFunc(app.showRegisterForm))
+	router.Handle(http.MethodPost+" /users", public.ThenFunc(app.createUser))
+
+	protected := dynamic.Append(app.requireAuthentication)
+	// Todos
+	router.Handle(http.MethodDelete+" /sessions", dynamic.ThenFunc(app.deleteSession))
+	router.Handle("GET /todos", protected.ThenFunc(app.home))
+	router.Handle("GET /professional", protected.ThenFunc(app.showProfessionalTodos))
+	router.Handle("GET /personal", protected.ThenFunc(app.showPersonalTodos))
+	router.Handle("POST /todos", protected.ThenFunc(app.createTodo))
+	router.Handle("DELETE /todos/{id}", protected.ThenFunc(app.deleteTodo))
+	router.Handle("PATCH /todos/{id}/status", protected.ThenFunc(app.toggleTodoStatus))
+	router.Handle("DELETE /todos", protected.ThenFunc(app.deleteCompletedTodos))
+
+	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 
 	return standard.Then(router)
 }
