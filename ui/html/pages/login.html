@@ -2,7 +2,7 @@
 
 {{define "main"}}
 <section class="w-full flex-grow flex flex-col items-center justify-center py-12">
-	<form class="bg-feathers rounded-[2rem] px-10 py-4 pb-2 flex flex-col items-start text-lg w-5/6 lg:w-1/2 relative">
+	<form class="relative bg-feathers rounded-[2rem] px-10 py-4 pb-2 flex flex-col items-start text-lg w-5/6 lg:w-1/2 relative">
 		<h2 class="mb-4 text-xl font-bold">Honk! Login to view your tasks!</h2>
 		<p class="mb-4 flex flex-col gap-0.5 w-full relative">
 			<label for="email" class="">Email:</label>
@@ -35,6 +35,7 @@
 				<span class="text-red-500 text-sm">{{.}}</span>
 				{{end}}
 		</p>
+		<img src="/static/img/go-in.svg" class="absolute bottom-4 right-6 h-[7rem] opacity-30"/>
 	</form>
 </section>
 {{end}}
