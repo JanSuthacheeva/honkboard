@@ -65,7 +65,7 @@ func (app *application) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/todos", http.StatusSeeOther)
 }
 
 func (app *application) createSession(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +111,7 @@ func (app *application) createSession(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/todos", http.StatusSeeOther)
 }
 
 func (app *application) deleteSession(w http.ResponseWriter, r *http.Request) {
@@ -122,7 +122,7 @@ func (app *application) deleteSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) showLoginForm(w http.ResponseWriter, r *http.Request) {

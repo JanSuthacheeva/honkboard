@@ -89,7 +89,7 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 func (app *application) noAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.isAuthenticated(r) {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.Redirect(w, r, "/todos", http.StatusSeeOther)
 			return
 		}
 
