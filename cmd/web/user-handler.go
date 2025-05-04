@@ -16,10 +16,25 @@ type registerForm struct {
 	validator.Validator `form:"-"`
 }
 
+type requestPasswordResetForm struct {
+	Email               string `form:"email"`
+	validator.Validator `form:"-"`
+}
+
 type loginForm struct {
 	Email               string `form:"email"`
 	Password            string `form:"password"`
 	validator.Validator `form:"-"`
+}
+
+type resetPasswordCodeForm struct {
+	Code                string `form:"code"`
+	validator.Validator `form:"-"`
+}
+
+type newPasswordForm struct {
+	Password        string `form:"password"`
+	PasswordConfirm string `form:"password_confirm"`
 }
 
 func (app *application) createUser(w http.ResponseWriter, r *http.Request) {
@@ -135,4 +150,73 @@ func (app *application) showRegisterForm(w http.ResponseWriter, r *http.Request)
 	data := app.newTemplateData(r)
 	data.Form = registerForm{}
 	app.render(w, r, http.StatusOK, "register.html", "base", data)
+}
+
+func (app *application) showPasswordRequest(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = requestPasswordResetForm{}
+	app.render(w, r, http.StatusOK, "request-password-reset.html", "base", data)
+}
+
+func (app *application) postPasswordRequest(w http.ResponseWriter, r *http.Request) {
+	var form requestPasswordResetForm
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
+	form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email address")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "request-password-reset.html", "base", data)
+		return
+	}
+
+	// create validation code
+	// send mail
+
+	http.Redirect(w, r, "/reset-password-code", http.StatusSeeOther)
+}
+
+func (app *application) showResetPasswordCode(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = resetPasswordCodeForm{}
+	app.render(w, r, http.StatusOK, "request-password-validation.html", "base", data)
+}
+
+func (app *application) postResetPasswordCode(w http.ResponseWriter, r *http.Request) {
+	var form resetPasswordCodeForm
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Code), "code", "This field must be exactly six digits long")
+	form.CheckField(validator.MinChars(form.Code, 6), "code", "This field must be exactly six digits long")
+	form.CheckField(validator.MaxChars(form.Code, 6), "code", "This field must be exactly six digits long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "request-password-validation.html", "base", data)
+		return
+	}
+
+	// validate code
+	// authenticate user
+	// redirect to reset-password
+}
+
+func (app *application) showNewPassword(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = newPasswordForm{}
+
+	app.render(w, r, http.StatusOK, "reset-password.html", "base", data)
 }
