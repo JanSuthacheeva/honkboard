@@ -39,8 +39,8 @@ func (app *application) routes() http.Handler {
 	router.Handle("PATCH /todos/{id}/status", protected.ThenFunc(app.toggleTodoStatus))
 	router.Handle("DELETE /todos", protected.ThenFunc(app.deleteCompletedTodos))
 
-	router.Handle(http.MethodGet+" /reset-password", protected.ThenFunc(app.showResetPassword))
-	router.Handle(http.MethodPost+" /reset-password", protected.ThenFunc(app.postResetPassword))
+	// router.Handle(http.MethodGet+" /reset-password", protected.ThenFunc(app.showResetPassword))
+	// router.Handle(http.MethodPost+" /reset-password", protected.ThenFunc(app.postResetPassword))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 

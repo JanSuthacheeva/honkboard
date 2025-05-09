@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"math/rand/v2"
 	"time"
 )
 
 type ValidationCode struct {
 	ID      int
+	UserID  int
 	Code    int
 	Expires time.Time
 	Type    string
@@ -18,14 +20,14 @@ type ValidationCodeModel struct {
 	DB *sql.DB
 }
 
-func (m *ValidationCodeModel) Insert(userId, code int, codeType string) (int, error) {
+func (m *ValidationCodeModel) Insert(userId int, codeType string) (int, error) {
 	query := `INSERT INTO validation_codes (user_id, code, type, expires)
 		VALUES(?, ?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 5 MINUTES))`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	result, err := m.DB.ExecContext(ctx, query, userId, code, codeType)
+	result, err := m.DB.ExecContext(ctx, query, userId, createCode(), codeType)
 	if err != nil {
 		return 0, nil
 	}
@@ -39,7 +41,7 @@ func (m *ValidationCodeModel) Insert(userId, code int, codeType string) (int, er
 }
 
 func (m *ValidationCodeModel) Get(code int) (ValidationCode, error) {
-	query := `SELECT id, code, type, expires FROM validation_codes
+	query := `SELECT id, user_id, code, type, expires FROM validation_codes
 		WHERE code = ?
 		AND expires > UTC_TIMESTAMP()`
 
@@ -48,7 +50,7 @@ func (m *ValidationCodeModel) Get(code int) (ValidationCode, error) {
 
 	var validationCode ValidationCode
 
-	err := m.DB.QueryRowContext(ctx, query, code).Scan(&validationCode.ID, &validationCode.Code, &validationCode.Type, &validationCode.Expires)
+	err := m.DB.QueryRowContext(ctx, query, code).Scan(&validationCode.ID, &validationCode.UserID, &validationCode.Code, &validationCode.Type, &validationCode.Expires)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -83,4 +85,9 @@ func (m *ValidationCodeModel) Delete(id int) error {
 	}
 
 	return nil
+}
+
+func createCode() int {
+	randInt := rand.IntN(999999-100000) + 100000
+	return randInt
 }

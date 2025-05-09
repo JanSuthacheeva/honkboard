@@ -2,7 +2,10 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/jansuthacheeva/honkboard/internal/models"
 	"github.com/jansuthacheeva/honkboard/internal/validator"
@@ -177,8 +180,37 @@ func (app *application) postPasswordRequest(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// create validation code
-	// send mail
+	userId, err := app.users.GetByEmail(form.Email)
+	if err != nil {
+		data := app.newTemplateData(r)
+		form.AddFieldError("email", "This email is not known in our system")
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "request-password-reset.html", "base", data)
+		return
+	}
+
+	app.logger.Info("hi", "validationCodes", app.validationCodes)
+
+	_, err = app.validationCodes.Insert(userId, "reset-password")
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	// get the code
+	code := models.ValidationCode{
+		Code:    000000,
+		ID:      1,
+		UserID:  userId,
+		Expires: time.Now().Add(5 * time.Minute),
+		Type:    "reset-password",
+	}
+
+	app.background(func() {
+		err = app.mailer.Send(form.Email, "reset_password.html", code)
+		if err != nil {
+			app.logger.Error(err.Error())
+		}
+	})
 
 	http.Redirect(w, r, "/reset-password-code", http.StatusSeeOther)
 }
@@ -209,7 +241,24 @@ func (app *application) postResetPasswordCode(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// validate code
+	codeAsInt, err := strconv.Atoi(form.Code)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	_, err = app.validationCodes.Get(codeAsInt)
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrNoRecord):
+			data := app.newTemplateData(r)
+			data.Form = form
+			app.render(w, r, http.StatusUnprocessableEntity, "request-password-validation.html", "base", data)
+		default:
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
 	// authenticate user
 	// redirect to reset-password
 }
