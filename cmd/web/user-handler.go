@@ -2,10 +2,8 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/jansuthacheeva/honkboard/internal/models"
 	"github.com/jansuthacheeva/honkboard/internal/validator"
@@ -189,20 +187,10 @@ func (app *application) postPasswordRequest(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	app.logger.Info("hi", "validationCodes", app.validationCodes)
-
-	_, err = app.validationCodes.Insert(userId, "reset-password")
+	code, err := app.validationCodes.Insert(userId, "reset-password")
 	if err != nil {
 		app.serverError(w, r, err)
 		return
-	}
-	// get the code
-	code := models.ValidationCode{
-		Code:    000000,
-		ID:      1,
-		UserID:  userId,
-		Expires: time.Now().Add(5 * time.Minute),
-		Type:    "reset-password",
 	}
 
 	app.background(func() {
@@ -246,7 +234,7 @@ func (app *application) postResetPasswordCode(w http.ResponseWriter, r *http.Req
 		app.serverError(w, r, err)
 		return
 	}
-	_, err = app.validationCodes.Get(codeAsInt)
+	_, err = app.validationCodes.GetByCode(codeAsInt)
 	if err != nil {
 		switch {
 		case errors.Is(err, models.ErrNoRecord):

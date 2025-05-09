@@ -20,27 +20,55 @@ type ValidationCodeModel struct {
 	DB *sql.DB
 }
 
-func (m *ValidationCodeModel) Insert(userId int, codeType string) (int, error) {
-	query := `INSERT INTO validation_codes (user_id, code, type, expires)
-		VALUES(?, ?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 5 MINUTES))`
+func (m *ValidationCodeModel) Insert(userId int, codeType string) (ValidationCode, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	result, err := m.DB.ExecContext(ctx, query, userId, createCode(), codeType)
+	tx, err := m.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return 0, nil
+		return ValidationCode{}, err
+	}
+
+	defer tx.Rollback()
+
+	insertQuery := `INSERT INTO validation_codes (user_id, code, type, expires)
+		VALUES(?, ?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 5 MINUTE))`
+
+	result, err := m.DB.ExecContext(ctx, insertQuery, userId, createCode(), codeType)
+	if err != nil {
+		return ValidationCode{}, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, err
+		return ValidationCode{}, err
 	}
 
-	return int(id), nil
+	var validationCode ValidationCode
+
+	getQuery := `SELECT id, user_id, code, type, expires FROM validation_codes
+	WHERE id = ?`
+
+	err = tx.QueryRowContext(ctx, getQuery, id).Scan(&validationCode.ID, &validationCode.UserID, &validationCode.Code, &validationCode.Type, &validationCode.Expires)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ValidationCode{}, ErrNoRecord
+		default:
+			return ValidationCode{}, err
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return ValidationCode{}, err
+	}
+
+	return validationCode, nil
 }
 
-func (m *ValidationCodeModel) Get(code int) (ValidationCode, error) {
+func (m *ValidationCodeModel) GetByCode(code int) (ValidationCode, error) {
+
 	query := `SELECT id, user_id, code, type, expires FROM validation_codes
 		WHERE code = ?
 		AND expires > UTC_TIMESTAMP()`
