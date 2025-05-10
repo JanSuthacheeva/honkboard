@@ -25,7 +25,7 @@ type application struct {
 	logger          *slog.Logger
 	todos           models.TodoModelInterface
 	users           *models.UserModel
-	validationCodes *models.ValidationCodeModel
+	passwordResetTokens *models.PasswordResetTokenModel
 	sessionManager  *scs.SessionManager
 	templateCache   map[string]*template.Template
 	formDecoder     *form.Decoder
@@ -97,7 +97,7 @@ func main() {
 		logger:          logger,
 		todos:           &models.TodoModel{DB: db},
 		users:           &models.UserModel{DB: db},
-		validationCodes: &models.ValidationCodeModel{DB: db},
+		passwordResetTokens: &models.PasswordResetTokenModel{DB: db},
 		sessionManager:  sessionManager,
 		templateCache:   templateCache,
 		formDecoder:     formDecoder,

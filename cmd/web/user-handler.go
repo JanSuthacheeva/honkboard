@@ -239,6 +239,7 @@ func (app *application) postResetPasswordCode(w http.ResponseWriter, r *http.Req
 		switch {
 		case errors.Is(err, models.ErrNoRecord):
 			data := app.newTemplateData(r)
+			form.AddFieldError("code", "We could not find any valid matching code.")
 			data.Form = form
 			app.render(w, r, http.StatusUnprocessableEntity, "request-password-validation.html", "base", data)
 		default:
@@ -247,7 +248,6 @@ func (app *application) postResetPasswordCode(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// authenticate user
 	// redirect to reset-password
 }
 
