@@ -15,23 +15,34 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jansuthacheeva/honkboard/internal/mailer"
 	"github.com/jansuthacheeva/honkboard/internal/models"
 	"github.com/joho/godotenv"
 )
 
 type application struct {
-	cfg            config
-	logger         *slog.Logger
-	todos          models.TodoModelInterface
-	users          *models.UserModel
-	sessionManager *scs.SessionManager
-	templateCache  map[string]*template.Template
-	formDecoder    *form.Decoder
+	cfg                 config
+	logger              *slog.Logger
+	todos               models.TodoModelInterface
+	users               *models.UserModel
+	passwordResetTokens *models.PasswordResetTokenModel
+	sessionManager      *scs.SessionManager
+	templateCache       map[string]*template.Template
+	formDecoder         *form.Decoder
+	mailer              *mailer.Mailer
 }
 
 type config struct {
 	addr string
 	dsn  string
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
+	baseUrl string
 }
 
 func main() {
@@ -44,6 +55,13 @@ func main() {
 
 	flag.StringVar(&cfg.dsn, "dsn", os.Getenv("DB_STRING"), "MySQL data source name")
 	flag.StringVar(&cfg.addr, "addr", ":4000", "HTTP network address")
+	flag.StringVar(&cfg.baseUrl, "baseUrl", "https://localhost:4000", "Server Home URL")
+
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "b8b37b30a398d8", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "0f69e0fd4663f7", "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Honkboard <no-reply@honkboard.com>", "SMTP sender")
 
 	flag.Parse()
 
@@ -71,14 +89,21 @@ func main() {
 
 	formDecoder := form.NewDecoder()
 
+	mailer, err := mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	app := application{
-		cfg:            cfg,
-		logger:         logger,
-		todos:          &models.TodoModel{DB: db},
-		users:          &models.UserModel{DB: db},
-		sessionManager: sessionManager,
-		templateCache:  templateCache,
-		formDecoder:    formDecoder,
+		cfg:                 cfg,
+		logger:              logger,
+		todos:               &models.TodoModel{DB: db},
+		users:               &models.UserModel{DB: db},
+		passwordResetTokens: &models.PasswordResetTokenModel{DB: db},
+		sessionManager:      sessionManager,
+		templateCache:       templateCache,
+		formDecoder:         formDecoder,
+		mailer:              mailer,
 	}
 
 	tlsConfig := &tls.Config{

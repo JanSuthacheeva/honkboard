@@ -23,6 +23,10 @@ func (app *application) routes() http.Handler {
 	router.Handle(http.MethodPost+" /sessions", public.ThenFunc(app.createSession))
 	router.Handle(http.MethodGet+" /register", public.ThenFunc(app.showRegisterForm))
 	router.Handle(http.MethodPost+" /users", public.ThenFunc(app.createUser))
+	router.Handle(http.MethodGet+" /request-password-link", public.ThenFunc(app.showPasswordRequest))
+	router.Handle(http.MethodPost+" /request-password-link", public.ThenFunc(app.postPasswordRequest))
+	router.Handle(http.MethodGet+" /reset-password", public.ThenFunc(app.showPasswordReset))
+	router.Handle(http.MethodPost+" /reset-password", public.ThenFunc(app.postPasswordReset))
 
 	protected := dynamic.Append(app.requireAuthentication)
 	// Todos
@@ -34,6 +38,9 @@ func (app *application) routes() http.Handler {
 	router.Handle("DELETE /todos/{id}", protected.ThenFunc(app.deleteTodo))
 	router.Handle("PATCH /todos/{id}/status", protected.ThenFunc(app.toggleTodoStatus))
 	router.Handle("DELETE /todos", protected.ThenFunc(app.deleteCompletedTodos))
+
+	// router.Handle(http.MethodGet+" /reset-password", protected.ThenFunc(app.showResetPassword))
+	// router.Handle(http.MethodPost+" /reset-password", protected.ThenFunc(app.postResetPassword))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 

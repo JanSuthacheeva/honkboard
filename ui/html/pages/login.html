@@ -1,8 +1,8 @@
 {{define "title"}}Login{{end}}
 
 {{define "main"}}
-<section class="w-full flex-grow flex flex-col items-center justify-center py-12">
-	<form class="relative bg-feathers rounded-[2rem] px-10 py-4 pb-2 flex flex-col items-start text-lg w-5/6 lg:w-1/2 relative">
+<section class="w-full flex-grow flex flex-col items-center justify-center py-12 bg-gradient-to-tr from-beak/30 to-white">
+	<form class="relative bg-feathers rounded-[2rem] px-10 py-4 pb-2 flex flex-col items-start text-lg w-5/6 lg:w-1/2 shadow-xl shadow-beak/20">
 		<h2 class="mb-4 text-xl font-bold">Honk! Login to view your tasks!</h2>
 		<p class="mb-4 flex flex-col gap-0.5 w-full relative">
 			<label for="email" class="">Email:</label>
@@ -17,6 +17,7 @@
 		<p class="mb-4 flex flex-col gap-0.5 w-full relative">
 			<label for="password" class="">Password:</label>
 			<input type="password" name="password" id="password" class="px-4 rounded-full focus:outline-none focus:bg-beak/30 hover:bg-beak/30 transition duration-150 ease-in">
+			<span class="text-sm py-1">Forgot your password? <a href="/request-password-link" class="underline">Click here.</a></span>
 			{{with .Form.FieldErrors.password}}
 				<span class="absolute top-[3.65rem] left-2 text-red-500 text-sm">{{.}}</span>
 			{{end}}

@@ -67,6 +67,39 @@ func (m *UserModel) Exists(id int) (bool, error) {
 	return exists, err
 }
 
+func (m *UserModel) GetByEmail(email string) (int, error) {
+	var id int
+	query := `SELECT id FROM users WHERE email = ?`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, email).Scan(&id)
+
+	return id, err
+}
+
+func (m *UserModel) UpdatePassword(email, password string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+
+	query := `UPDATE users
+	SET hashed_password = ?
+	WHERE email = ?`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err = m.DB.ExecContext(ctx, query, string(hashedPassword), email)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *UserModel) Insert(name, email, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
