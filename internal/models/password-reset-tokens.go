@@ -11,8 +11,8 @@ import (
 
 type PasswordResetToken struct {
 	ID      int
-	Email  string
-	Token    string
+	Email   string
+	Token   string
 	Expires time.Time
 }
 

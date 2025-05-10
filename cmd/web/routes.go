@@ -25,8 +25,8 @@ func (app *application) routes() http.Handler {
 	router.Handle(http.MethodPost+" /users", public.ThenFunc(app.createUser))
 	router.Handle(http.MethodGet+" /request-password-link", public.ThenFunc(app.showPasswordRequest))
 	router.Handle(http.MethodPost+" /request-password-link", public.ThenFunc(app.postPasswordRequest))
-	router.Handle(http.MethodGet+" /reset-password-code", public.ThenFunc(app.showResetPasswordCode))
-	router.Handle(http.MethodPost+" /reset-password-code", public.ThenFunc(app.postResetPasswordCode))
+	router.Handle(http.MethodGet+" /reset-password", public.ThenFunc(app.showPasswordReset))
+	router.Handle(http.MethodPost+" /reset-password", public.ThenFunc(app.postPasswordReset))
 
 	protected := dynamic.Append(app.requireAuthentication)
 	// Todos

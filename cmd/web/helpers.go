@@ -48,6 +48,7 @@ func (app *application) newTemplateData(r *http.Request) templateData {
 	return templateData{
 		IsAuthenticated: app.isAuthenticated(r),
 		CSRFToken:       nosurf.Token(r),
+		BaseURL:         app.cfg.baseUrl,
 	}
 }
 

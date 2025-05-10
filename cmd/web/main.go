@@ -21,15 +21,15 @@ import (
 )
 
 type application struct {
-	cfg             config
-	logger          *slog.Logger
-	todos           models.TodoModelInterface
-	users           *models.UserModel
+	cfg                 config
+	logger              *slog.Logger
+	todos               models.TodoModelInterface
+	users               *models.UserModel
 	passwordResetTokens *models.PasswordResetTokenModel
-	sessionManager  *scs.SessionManager
-	templateCache   map[string]*template.Template
-	formDecoder     *form.Decoder
-	mailer          *mailer.Mailer
+	sessionManager      *scs.SessionManager
+	templateCache       map[string]*template.Template
+	formDecoder         *form.Decoder
+	mailer              *mailer.Mailer
 }
 
 type config struct {
@@ -42,6 +42,7 @@ type config struct {
 		password string
 		sender   string
 	}
+	baseUrl string
 }
 
 func main() {
@@ -54,6 +55,7 @@ func main() {
 
 	flag.StringVar(&cfg.dsn, "dsn", os.Getenv("DB_STRING"), "MySQL data source name")
 	flag.StringVar(&cfg.addr, "addr", ":4000", "HTTP network address")
+	flag.StringVar(&cfg.baseUrl, "baseUrl", "https://localhost:4000", "Server Home URL")
 
 	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")
@@ -93,15 +95,15 @@ func main() {
 		os.Exit(1)
 	}
 	app := application{
-		cfg:             cfg,
-		logger:          logger,
-		todos:           &models.TodoModel{DB: db},
-		users:           &models.UserModel{DB: db},
+		cfg:                 cfg,
+		logger:              logger,
+		todos:               &models.TodoModel{DB: db},
+		users:               &models.UserModel{DB: db},
 		passwordResetTokens: &models.PasswordResetTokenModel{DB: db},
-		sessionManager:  sessionManager,
-		templateCache:   templateCache,
-		formDecoder:     formDecoder,
-		mailer:          mailer,
+		sessionManager:      sessionManager,
+		templateCache:       templateCache,
+		formDecoder:         formDecoder,
+		mailer:              mailer,
 	}
 
 	tlsConfig := &tls.Config{

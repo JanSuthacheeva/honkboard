@@ -86,7 +86,7 @@ func (m *UserModel) UpdatePassword(email, password string) error {
 	}
 
 	query := `UPDATE users
-	SET password = ?
+	SET hashed_password = ?
 	WHERE email = ?`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -94,12 +94,6 @@ func (m *UserModel) UpdatePassword(email, password string) error {
 
 	_, err = m.DB.ExecContext(ctx, query, string(hashedPassword), email)
 	if err != nil {
-		var mySQLError *mysql.MySQLError
-		if errors.As(err, &mySQLError) {
-			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users_uc_email") {
-				return ErrDuplicateEmail
-			}
-		}
 		return err
 	}
 

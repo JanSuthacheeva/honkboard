@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/jansuthacheeva/honkboard/internal/models"
 	"github.com/jansuthacheeva/honkboard/internal/validator"
@@ -28,14 +27,11 @@ type loginForm struct {
 	validator.Validator `form:"-"`
 }
 
-type resetPasswordCodeForm struct {
-	Code                string `form:"code"`
+type passwordResetForm struct {
+	Password            string `form:"password"`
+	PasswordConfirm     string `form:"password_confirm"`
+	Token               string `form:"token"`
 	validator.Validator `form:"-"`
-}
-
-type newPasswordForm struct {
-	Password        string `form:"password"`
-	PasswordConfirm string `form:"password_confirm"`
 }
 
 func (app *application) createUser(w http.ResponseWriter, r *http.Request) {
@@ -174,43 +170,68 @@ func (app *application) postPasswordRequest(w http.ResponseWriter, r *http.Reque
 	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
-		app.render(w, r, http.StatusUnprocessableEntity, "request-password-reset.html", "base", data)
+		app.render(w, r, http.StatusUnprocessableEntity, "request-password-reset.html", "request-password-reset-form", data)
 		return
 	}
 
-	userId, err := app.users.GetByEmail(form.Email)
-	if err != nil {
-		data := app.newTemplateData(r)
-		form.AddFieldError("email", "This email is not known in our system")
-		data.Form = form
-		app.render(w, r, http.StatusUnprocessableEntity, "request-password-reset.html", "base", data)
-		return
-	}
+	_, err = app.users.GetByEmail(form.Email)
 
-	code, err := app.validationCodes.Insert(userId, "reset-password")
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	app.background(func() {
-		err = app.mailer.Send(form.Email, "reset_password.html", code)
+	if err == nil {
+		token, err := app.passwordResetTokens.Insert(form.Email)
 		if err != nil {
-			app.logger.Error(err.Error())
+			app.serverError(w, r, err)
+			return
 		}
-	})
 
-	http.Redirect(w, r, "/reset-password-code", http.StatusSeeOther)
-}
+		app.background(func() {
+			data := app.newTemplateData(r)
+			data.PasswordResetToken = token
+			err = app.mailer.Send(form.Email, "reset_password.html", data)
+			if err != nil {
+				app.logger.Error(err.Error())
+			}
+		})
+	}
 
-func (app *application) showResetPasswordCode(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
-	data.Form = resetPasswordCodeForm{}
-	app.render(w, r, http.StatusOK, "request-password-validation.html", "base", data)
+	app.render(w, r, http.StatusOK, "request-password-reset.html", "password-reset-link-send", data)
+
 }
 
-func (app *application) postResetPasswordCode(w http.ResponseWriter, r *http.Request) {
-	var form resetPasswordCodeForm
+func (app *application) showPasswordReset(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	queryToken := r.URL.Query().Get("token")
+	if queryToken == "" {
+		form := requestPasswordResetForm{}
+		form.AddFieldError("email", "No token found in request")
+		data.Form = form
+		app.render(w, r, http.StatusSeeOther, "request-password-reset.html", "base", data)
+		return
+	}
+
+	token, err := app.passwordResetTokens.Get(queryToken)
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrNoRecord):
+			form := requestPasswordResetForm{}
+			form.AddFieldError("email", "Invalid or expired token")
+			data.Form = form
+			app.render(w, r, http.StatusSeeOther, "request-password-reset.html", "base", data)
+		default:
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data.PasswordResetToken = token
+	data.Form = passwordResetForm{}
+
+	app.render(w, r, http.StatusOK, "reset-password.html", "base", data)
+}
+
+func (app *application) postPasswordReset(w http.ResponseWriter, r *http.Request) {
+	var form passwordResetForm
 
 	err := app.decodePostForm(r, &form)
 	if err != nil {
@@ -218,42 +239,37 @@ func (app *application) postResetPasswordCode(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	form.CheckField(validator.NotBlank(form.Code), "code", "This field must be exactly six digits long")
-	form.CheckField(validator.MinChars(form.Code, 6), "code", "This field must be exactly six digits long")
-	form.CheckField(validator.MaxChars(form.Code, 6), "code", "This field must be exactly six digits long")
+	form.CheckField(validator.NotBlank(form.Token), "token", "This field cannot be blank")
+	form.CheckField(validator.MinChars(form.Token, 64), "token", "This field must be exactly 64 characters long")
+	form.CheckField(validator.MaxChars(form.Token, 64), "token", "This field must be exactly 64 characters long")
+	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
+	form.CheckField(validator.MinChars(form.Password, 8), "password", "This field must have at least 8 chars")
+	form.CheckField(validator.ValidPassword(form.Password), "password", "This field must have at least 1 of each: upper case, lower case, number, special char")
+	form.CheckField(validator.NotBlank(form.PasswordConfirm), "password_confirm", "This field cannot be blank")
+	form.CheckField(validator.MinChars(form.PasswordConfirm, 8), "password_confirm", "This field must have at least 8 chars")
+	form.CheckField(validator.ValidPassword(form.PasswordConfirm), "password_confirm", "This field must have at least 1 of each: upper case, lower case, number, special char")
+	form.CheckField(validator.Equal(form.Password, form.PasswordConfirm), "password_confirm", "This field must equal the password field")
 
+	data := app.newTemplateData(r)
 	if !form.Valid() {
-		data := app.newTemplateData(r)
 		data.Form = form
-		app.render(w, r, http.StatusUnprocessableEntity, "request-password-validation.html", "base", data)
+		app.render(w, r, http.StatusUnprocessableEntity, "reset-password.html", "reset-password-form", data)
 		return
 	}
-
-	codeAsInt, err := strconv.Atoi(form.Code)
+	token, err := app.passwordResetTokens.Get(form.Token)
 	if err != nil {
 		app.serverError(w, r, err)
-		return
 	}
-	_, err = app.validationCodes.GetByCode(codeAsInt)
+
+	err = app.passwordResetTokens.Delete(token.ID)
 	if err != nil {
-		switch {
-		case errors.Is(err, models.ErrNoRecord):
-			data := app.newTemplateData(r)
-			form.AddFieldError("code", "We could not find any valid matching code.")
-			data.Form = form
-			app.render(w, r, http.StatusUnprocessableEntity, "request-password-validation.html", "base", data)
-		default:
-			app.serverError(w, r, err)
-		}
-		return
+		app.serverError(w, r, err)
 	}
 
-	// redirect to reset-password
-}
+	err = app.users.UpdatePassword(token.Email, form.Password)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 
-func (app *application) showNewPassword(w http.ResponseWriter, r *http.Request) {
-	data := app.newTemplateData(r)
-	data.Form = newPasswordForm{}
-
-	app.render(w, r, http.StatusOK, "reset-password.html", "base", data)
+	app.render(w, r, http.StatusOK, "reset-password.html", "reset-password-success", data)
 }
