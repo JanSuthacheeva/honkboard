@@ -63,7 +63,7 @@ func (m *Mailer) Send(recipient string, templateFile string, data any) error {
 	}
 
 	htmlBody := new(bytes.Buffer)
-	err = htmlTmpl.ExecuteTemplate(plainBody, "plainBody", data)
+	err = htmlTmpl.ExecuteTemplate(htmlBody, "htmlBody", data)
 	if err != nil {
 		return err
 	}
