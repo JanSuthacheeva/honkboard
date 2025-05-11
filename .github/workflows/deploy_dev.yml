@@ -34,5 +34,5 @@ jobs:
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        scp -o StrictHostKeyChecking=no honkboard $SERVER_USER@$SERVER_IP:$DEV_DEPLOY_PATH
+        scp -o StrictHostKeyChecking=no honkboard $SERVER_USER@$SERVER_IP:/home/forge/dev.honkboard.com/tmp/honkboard
         curl "$DEPLOY_DEV_WEBHOOK"
