@@ -1,0 +1,13 @@
+-- +goose Up
+ALTER TABLE todos
+ADD COLUMN user_id INTEGER NOT NULL,
+ADD FOREIGN KEY (user_id) REFERENCES users(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- +goose Down
+ALTER TABLE todos
+DROP FOREIGN KEY user_id;
+
+ALTER TABLE todos
+DROP COLUMN user_id;

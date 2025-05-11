@@ -1,3 +1,60 @@
 @tailwind base;
 @tailwind utilities;
 @tailwind components;
+
+/* width */
+::-webkit-scrollbar {
+  width: 0.5rem;
+}
+/* Track */
+::-webkit-scrollbar-track {
+  background: #FDF6E3;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-top-right-radius: 2rem 2rem;
+  border-bottom-right-radius: 2rem 2rem;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgba(200, 120, 36, 0.5);
+  border-radius: 0.25rem;
+}
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 120, 36, 0.9);
+}
+
+.swipe-enabled.swipe-me-out.htmx-swapping {
+  opacity: 0;
+  transform: translateX(20vw);
+  transition: opacity 0.10s ease-out, transform 0.15s ease-out;
+}
+
+.swipe-enabled.swipe-me-in.htmx-added {
+  opacity: 0;
+  transform: translateX(-20vw);
+}
+
+.swipe-enabled.swipe-me-in {
+  opacity: 1;
+  transform: translateX(0vw);
+  transition: opacity 0.10s ease-out, transform 0.15s ease-out;
+}
+
+.fade-me-out.htmx-swapping > div {
+  opacity: 0;
+  transition: opacity 0.10s ease-out;
+}
+
+.fade-me-in.htmx-added > div {
+  opacity: 0;
+}
+
+.fade-me-in > div {
+  opacity: 1;
+  transition: opacity 0.10s ease-out;
+}
+
+.blur {
+  filter: blur(4px);
+}

@@ -1,0 +1,52 @@
+{{define "todo-row"}}
+<li
+	x-data="modals"
+	id="todo-{{.ID}}"
+	class="relative border-b border-blue-300 flex flex-row gap-2 items-center justify-between fade-me-in fade-me-out pr-1"
+>
+	<div class="flex flex-row gap-2 items-center py-2 w-full justify-between">
+		<button
+		class='rounded-full border-2 {{if eq .Status "done"}} border-beak {{else}} border-black {{end}} h-[2rem] w-[2rem] focus:outline-none focus:scale-110 focus:bg-beak/30 hover:scale-110 hover:bg-beak/30 transition duration-150 ease-in'
+			hx-patch="/todos/{{.ID}}/status"
+			hx-target="#todo-{{.ID}}"
+			hx-swap="outerHTML swap:0.10s"
+		>
+		{{if eq .Status "done"}}
+			<img src="/static/img/done.svg">
+		{{end}}
+		</button>
+		<p class='flex-grow {{if eq .Status "done"}} line-through text-gray-500 {{end}}'>{{.Title}}</p>
+	</div>
+	<button
+		@click="openDeleteTodoModal"
+		class="h-[2rem] w-[2rem] rounded-full focus:outline-none focus:scale-110 focus:bg-slate-300 hover:scale-110 hover:bg-slate-300 transition duration-150 ease-in delete-todo-button"
+	>
+		<img src="/static/img/trashcan.svg">
+	</button>
+	<div
+		x-show="showDeleteTodoModal"
+		x-transition
+		class="absolute w-full h-full bg-white flex items-center z-10"
+	>
+		<div class="relative flex-grow w-full h-full bg-white flex flex-row gap-2 items-center justify-between px-4 overflow-hidden">
+			<p class="mr-auto">Are you sure you want to delete this To-Do?</p>
+			<img class="absolute bottom-[-1rem] right-1/3 w-[4.5rem] h-[4.5rem] opacity-40" src="/static/img/confirm.svg">
+			<button
+				class="text-white rounded-xl bg-blue-300 px-2 py-1 focus:outline-none focus:bg-blue-500 hover:bg-blue-500 transition duration-150 ease-in"
+				@click="closeDeleteTodoModal"
+				hx-delete="/todos/{{.ID}}"
+				hx-swap="outerHTML"
+				hx-target="#todo-list"
+			>
+				Confirm
+			</button>
+			<button
+				class="text-white rounded-xl bg-beak/70 px-2 py-1 focus:outline-none focus:bg-beak hover:bg-beak transition duration-150 ease-in"
+				@click="closeDeleteTodoModal"
+			>
+				Close
+			</button>
+		</div>
+	</div>
+</li>
+{{end}}

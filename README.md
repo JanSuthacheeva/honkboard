@@ -1,5 +1,6 @@
-# HONKBOARD
+<img src="./static/img/logo-white.png" style="width:300px;height:300px;">
 
+# HONKBOARD
 Honkboard is a simple ToDo list application.
 This project is built in order to gain more experience with Go and HTMX.
 

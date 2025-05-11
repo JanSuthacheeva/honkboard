@@ -1,4 +1,8 @@
 #!/usr/bin/env make
+ifneq (,$(wildcard .env))
+    include .env
+    export $(shell sed 's/=.*//' .env)
+endif
 
 # ===========================================================================
 # HELPERS
@@ -26,9 +30,9 @@ db/mysql:
 
 ## db/migrations/up: apply all new migrations
 .PHONY: db/migrations/up
-db/migrations/up: confirm
+db/migrations/up:
 	@echo 'Run migrations'
-	goose ${GOOSE_DRIVER} ${GOOSE_DBSTRING} up -dir ${GOOSE_MIGRATION_DIR}
+	goose ${GOOSE_DB_STRING} up -dir ${GOOSE_MIGRATION_DIR}
 
 ## db/migrations/down: remove migrations
 .PHONY: db/migrations/down
@@ -39,7 +43,7 @@ db/migrations/down:
 .PHONY: db/migrations/new
 db/migrations/new:
 	@echo 'Create new goose sql migration'
-	goose create ${name} sql
+	goose create ${name} sql -dir ${GOOSE_MIGRATION_DIR}
 
 ## db/seed: seeds the db
 .PHONY: db/seed

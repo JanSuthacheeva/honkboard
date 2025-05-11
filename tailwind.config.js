@@ -11,7 +11,11 @@ module.exports = {
         'feathers': '#FDF6E3',
         'feathers-dark': '#E6DFC9',
         'beak': '#C87824'
-      }
+      },
+      screens: {
+        portrait: { raw: '(orientation: portrait)' },
+        landscape: { raw: '(orientation: landscape)' },
+      },
     },
   },
   plugins: [],

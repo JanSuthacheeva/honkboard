@@ -1,0 +1,29 @@
+{{define "todo-list"}}
+	<div id="todo-list" class="relative swipe-me-out swipe-me-in py-2">
+		<h2 class="text-xl font-bold mb-4">{{.ListType}} Tasks</h2>
+		{{if .Todos}}
+		<ul class="mb-10 text-xl">
+		{{range .Todos}}
+		{{template "todo-row" .}}
+		{{end}}
+		</ul>
+	{{else}}
+		<p class="mb-10 mt-2 text-xl">Quiet day today... Let's add some tasks!</p>
+	{{end}}
+	{{range .Errors}}
+		<p class="bottom-0 text-red-500 absolute">{{.}}</p>
+	{{end}}
+		<div
+			class="text-beak flex flex-row justify-end pr-12"
+		>
+			<button id="completed-button"
+				class="h-[2rem] flex flex-row items-center rounded-full px-2 focus:outline-none focus:bg-slate-300 focus:scale-110 hover:bg-slate-300 hover:scale-110 active:bg-slate-500 disabled:hover:scale-100 disabled:hover:bg-transparent transition duration-150 ease-in"
+				{{if eq (countDoneTodos .Todos) 0 }} disabled {{ end }}
+				@click="openDeleteAllModal"
+			>
+				<img class="h-full" src="/static/img/cleanup.svg">
+				<span>Clear Completed ({{countDoneTodos .Todos}})</span>
+			</button>
+		</div>
+	</div>
+{{end}}
