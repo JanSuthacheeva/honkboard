@@ -29,9 +29,10 @@ jobs:
         SERVER_USER: ${{ secrets.SERVER_USER }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
         DEPLOY_PATH: ${{ secrets.DEV_DEPLOY_PATH }}
+        DEPLOY_DEV_WEBHOOK: ${{ secrets.FORGE_DEPLOY_DEV }}
       run: |
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-
         scp -o StrictHostKeyChecking=no honkboard $SERVER_USER@$SERVER_IP:$DEV_DEPLOY_PATH
+        curl "$DEPLOY_DEV_WEBHOOK"
