@@ -60,7 +60,7 @@ func (app *application) createUser(w http.ResponseWriter, r *http.Request) {
 	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
-		app.render(w, r, http.StatusUnprocessableEntity, "register.html", "main", data)
+		app.render(w, r, http.StatusUnprocessableEntity, "register.html", "base", data)
 		return
 	}
 
