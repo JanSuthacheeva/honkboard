@@ -5,10 +5,12 @@ name: Go
 
 on:
   push:
-    branches: [ "develop" ]
+    branches:
+      - develop
+      - main
 
 jobs:
-  build:
+  build-dev:
     if: github.ref == 'refs/heads/develop'
 
     runs-on: ubuntu-latest
@@ -28,7 +30,6 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
-        DEPLOY_PATH: ${{ secrets.DEV_DEPLOY_PATH }}
         DEPLOY_DEV_WEBHOOK: ${{ secrets.FORGE_DEPLOY_DEV }}
       run: |
         mkdir -p ~/.ssh
@@ -36,3 +37,31 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         scp -o StrictHostKeyChecking=no honkboard $SERVER_USER@$SERVER_IP:/home/forge/dev.honkboard.com/tmp/honkboard_new
         curl "$DEPLOY_DEV_WEBHOOK"
+
+  build-prod:
+    if: github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23.7'
+
+    - name: Build
+      run: go build -o ./honkboard ./cmd/web/.
+      
+    - name: Deploy to server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+        DEPLOY_PROD_WEBHOOK: ${{ secrets.FORGE_DEPLOY_DEV }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        scp -o StrictHostKeyChecking=no honkboard $SERVER_USER@$SERVER_IP:/home/forge/honkboard.com/tmp/honkboard_new
+        curl "$DEPLOY_PROD_WEBHOOK"
