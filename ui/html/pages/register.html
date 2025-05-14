@@ -1,8 +1,14 @@
 {{define "title"}}Register{{end}}
 
 {{define "main"}}
-<section class="w-full flex-grow flex flex-col items-center justify-center py-12 bg-gradient-to-tr from-beak/30 to-white">
+<section class="w-full flex-grow flex flex-col items-center justify-center py-12">
 	<form class="absolute bg-feathers rounded-[2rem] px-10 py-4 pb-2 flex flex-col items-start text-lg w-5/6 lg:w-1/2 shadow-xl shadow-beak/20">
+		<div class="flex flex-row justify-start items-center gap-1 mb-4">
+			<p>←</p>
+			<a href="/"
+				class="underline hover:text-beak transition duration-150 ease-in font-lg focus:outline-none focus:text-beak"
+			>Back</a>
+		</div>
 		<h2 class="mb-4 text-xl font-bold">Welcome to Honkboard!</h2>
 		<p class="mb-4 flex flex-col gap-0.5 w-full relative">
 			<label for="email" class="">Email:</label>
@@ -37,8 +43,8 @@
 				<span class="absolute top-[3.65rem] left-2 text-red-500 text-sm">{{.}}</span>
 			{{end}}
 		</p>
-		<p class="text-sm mb-4 pt-1">Already have an account?<br><a href="/login" class="underline">Click here!</a></p>
-		<p class="mb-4 flex flex-col">
+		<p class="text-sm mb-4 pt-1">Already have an account?<br><a href="/login" class="underline hover:text-beak focus:outline-none focus:text-beak">Click here!</a></p>
+		<p class="mb-4 flex flex-row justify-end w-full">
 			<input type="submit"
 				class="text-white rounded-xl bg-blue-300 px-2 py-1 focus:outline-none focus:bg-blue-500 hover:bg-blue-500 transition duration-150 ease-in"
 				value="Register"
@@ -48,7 +54,6 @@
 				hx-push-url="true"
 			>
 		</p>
-		<img src="/static/img/go-in.svg" class="absolute bottom-4 right-6 h-[7rem] opacity-30"/>
 	</form>
 </section>
 {{end}}
