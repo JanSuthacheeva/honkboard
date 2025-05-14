@@ -610,6 +610,30 @@ video {
   top: 1rem;
 }
 
+.right-1\/2 {
+  right: 50%;
+}
+
+.right-\[40\%\] {
+  right: 40%;
+}
+
+.bottom-\[-0\.5rem\] {
+  bottom: -0.5rem;
+}
+
+.bottom-\[-0\.25rem\] {
+  bottom: -0.25rem;
+}
+
+.bottom-\[-0\.3rem\] {
+  bottom: -0.3rem;
+}
+
+.bottom-\[-0\.4rem\] {
+  bottom: -0.4rem;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -756,6 +780,10 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-\[4rem\] {
+  width: 4rem;
 }
 
 .max-w-2xl {
