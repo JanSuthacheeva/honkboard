@@ -16,12 +16,12 @@
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgba(200, 120, 36, 0.5);
+  background: black;
   border-radius: 0.25rem;
 }
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(200, 120, 36, 0.9);
+  background: oklch(62.3% 0.214 259.815);
 }
 
 .swipe-enabled.swipe-me-out.htmx-swapping {
