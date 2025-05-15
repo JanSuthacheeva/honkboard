@@ -46,9 +46,11 @@
 				<main class="w-full flex-grow overflow-y-scroll flex">
 					{{template "main" .}}
 				</main>
+		{{if .ShowFooter}}
 			<footer class="w-full flex justify-center bg-feathers-dark py-2 relative">
 				<p>Powered by <a class="underline focus:outline-none focus:text-beak hover:text-beak transition duration-150 ease-in" href='https://golang.org/'>Go</a></p>
 			</footer>
+		{{end}}
 		</body>
 </html>
 {{end}}
