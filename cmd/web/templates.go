@@ -20,6 +20,7 @@ type templateData struct {
 	CSRFToken          string
 	BaseURL            string
 	PasswordResetToken models.PasswordResetToken
+	ShowFooter         bool
 }
 
 func countDoneTodos(todos []models.Todo) int {
